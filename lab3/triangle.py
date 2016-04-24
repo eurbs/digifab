@@ -15,11 +15,11 @@ In-memory representation of the STL triangles.
 """
 
 class Triangle(object):
-  def __init__(self, points, normal=[]):
+  def __init__(self, points, normal=None):
     """
     Keyword arguments:
     points -- array of three point3Ds
-    normal -- optional normal. Will calculate if not provided.
+    normal -- optional normal (point3D type).
     """
     self.points = points
     if normal:
@@ -33,6 +33,10 @@ class Triangle(object):
     #       Right now I'm assuming the min is in the top or bottom
     self.z_min = self._getMinZ()
     self.z_max = self._getMaxZ()
+
+  def __str__(self):
+    return "normal: {!s}\n vertices:\n\t{!s}\n\t{!s}\n\t{!s}".format(
+      self.normal, self.points[0], self.points[1], self.points[2])
 
   def calculateNormal(self):
     """Calculates and sets normal of a triangle"""
@@ -101,4 +105,20 @@ class Triangle(object):
     deleteDupes = set(pointsOnPlane)
     if(len(deleteDupes) > 2):
       raise Exception("Too many points to define a line segment in triangle: " + self.points)
-    return Segment(deleteDupes[0], deleteDupes[1])
+    return segment(deleteDupes[0], deleteDupes[1])
+
+
+def test():
+  """Test function in the case we don't use unittest or mock"""
+  normal = Point3D(0, 0, 1)
+  points = [Point3D(1, 1, 0), Point3D(1, 2, 0), Point3D(2, 1, 0)]
+  triangle = Triangle(points, normal)
+  print "--------------printing type of triangle object--------------"
+  print type(triangle)
+  print "--------------printing triangle--------------"
+  print triangle
+  print "--------------trying to initialize with no normal--------------"
+  triangle2 = Triangle(points) # should throw exception
+
+if __name__ == "__main__":
+  test()
