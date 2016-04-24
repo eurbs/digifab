@@ -1,4 +1,5 @@
 from triangle import *
+import argparse
 """
 Emilee Urbanek and Nick Confrey
 CMSC 22010: Digital Fabrication
@@ -9,6 +10,24 @@ Due: 4/25
 
 Parsing functions
 """
+def parseInput():
+  parser = argparse.ArgumentParser()
+  parser.add_argument("path", help="path to the stl file (just the filename if in cwd)")
+  # parser.add_argument(
+    # "--layer_height", type=float, help="set the layer height; default is 0.19mm", default=0.19)
+  # parser.add_argument("--infill", type=int, help="set infill; default is 20%", default=20)
+  # parser.add_argument("--infill", help="set infill; default is 20%", action="store_const", const=)
+  # parser.add_argument("")
+  args = parser.parse_args()
+
+  # do defaults for now, worry about parsing properly later
+  infill = 0.20
+  layerHeight = 0.19
+  filamentThickness = 1.75
+  support = False
+
+  return (args.path, infill, layerHeight, filamentThickness, support)
+
 
 def parseSTL(filename):
   """Given a filename in the cwd, opens file and parses STL.
@@ -41,8 +60,9 @@ def printFunc(x):
   print x
 
 def test():
-  triangles = parseSTL("samples/3mmBox.stl")
-  temp = map(printFunc, triangles)
+  # triangles = parseSTL("samples/3mmBox.stl")
+  # temp = map(printFunc, triangles)
+  parseInput()
 
 if __name__ == "__main__":
   test()

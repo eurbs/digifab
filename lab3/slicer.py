@@ -1,4 +1,5 @@
 from triangle import *
+from parse import *
 """
 Emilee Urbanek and Nick Confrey
 CMSC 22010: Digital Fabrication
@@ -12,6 +13,7 @@ This file holds all of the main logic to make the slicer run.
 """
 
 def main():
+	filename, infill, layerHeight, filamentThickness, support = parseInput()
   print "Nothing is done yet"
 
 if __name__ == "__main__":
