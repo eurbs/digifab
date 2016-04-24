@@ -1,7 +1,7 @@
 from point3d import *
 
 """
-Emilee Urbanek
+Emilee Urbanek and Nick Confrey
 CMSC 22010: Digital Fabrication
 Lab 3
 Due: 4/25
