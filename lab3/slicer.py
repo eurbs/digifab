@@ -12,7 +12,7 @@ This file holds all of the main logic to make the slicer run.
 """
 
 def main():
-    print "Nothing is done yet"
+  print "Nothing is done yet"
 
 if __name__ == "__main__":
-    main()
+  main()
