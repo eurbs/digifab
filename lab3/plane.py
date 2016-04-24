@@ -15,9 +15,12 @@ Used to define the cutting Plane
 
 class Plane(object):
   def __init__(self):
-  	self.normal = point3d(0,0,1)
+  	self.normal = Point3D(0,0,1)
   	self.distance = 0
 
   def distanceFrom(self, point):
   	""" returns the distance of a point from this plane """
-  	return dot(self.normal,point) + self.distance
+  	return numpy.dot(self.normal.getArray(),point.getArray()) + self.distance
+
+  def up(self, increment):
+  	self.normal.z = increment
