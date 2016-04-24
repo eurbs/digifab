@@ -60,9 +60,17 @@ def printFunc(x):
   print x
 
 def test():
-  # triangles = parseSTL("samples/3mmBox.stl")
-  # temp = map(printFunc, triangles)
-  parseInput()
+  print "--------------parsing stl--------------"
+  triangles = parseSTL("samples/3mmBox.stl")
+  print "--------------printing parsed stl--------------"
+  temp = map(printFunc, triangles)
+  print "--------------parsing commandline args--------------"
+  filename, infill, layerHeight, filamentThickness, support = parseInput()
+  print "filename: {}".format(filename)
+  print "infill: {}".format(infill)
+  print "layer height: {}mm".format(layerHeight)
+  print "filament thickness: {}mm".format(filamentThickness)
+  print "support: {}".format(support)
 
 if __name__ == "__main__":
   test()
