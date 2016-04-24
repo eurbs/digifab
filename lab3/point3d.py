@@ -6,10 +6,25 @@ Z = 2
 
 class Point3D(object):
   def __init__(self, x, y, z):
-    self.x = x
-    self.y = y
-    self.z = z
+    self.x = float(x)
+    self.y = float(y)
+    self.z = float(z)
+
+  def __str__(self):
+    return "point: {:.5f} {:.5f} {:.5f}".format(self.x, self.y, self.z)
 
   def getArray(self):
     """Returns the array representation of the point with x,y,z respectively"""
     return [self.x, self.y, self.z]
+
+
+def test():
+  """Test function in the case we don't use unittest or mock"""
+  point = Point3D(1, 2, 3)
+  print "--------------printing type of point--------------"
+  print type(point)
+  print "--------------printing a Point3D--------------"
+  print point
+
+if __name__ == "__main__":
+  test()
