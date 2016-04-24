@@ -67,7 +67,7 @@ class Triangle(object):
         max_z = point.z
     return max_z
 
-  def _segmentPlaneIntersection(p1, p2, plane):
+  def _segmentPlaneIntersection(self, p1, p2, plane):
     """ Used as a helper in plane triangle intersection """
     #an arbitrary small number to deal with numerical percision issues
     espilon = 0.001
@@ -90,14 +90,18 @@ class Triangle(object):
       return pointsOnPlane
 
     place = d1 / (d1 - d2)
-    pointsOnPlane.append(P1 + place * (p2 - p1))
+    # P1 + place * (P2 - P1)
+    temp1 = numpy.subtract(p2.a, p1.a)
+    temp2 = numpy.multiply(temp1, place)
+    pointsOnPlane.append(list(numpy.add(p1.a, temp2)))
     return pointsOnPlane
 
   def intersectPlane(self, plane):
     pointsOnPlane = []
-    pointsOnPlane.extend(_segmentPlaneIntersection(self.points[0], self.points[1]))
-    pointsOnPlane.extend(_segmentPlaneIntersection(self.points[1], self.points[2]))
-    pointsOnPlane.extend(_segmentPlaneIntersection(self.points[2], self.points[0]))
+    pointsOnPlane.extend(self._segmentPlaneIntersection(self.points[0], self.points[1], plane))
+    pointsOnPlane.extend(self._segmentPlaneIntersection(self.points[1], self.points[2], plane))
+    pointsOnPlane.extend(self._segmentPlaneIntersection(self.points[2], self.points[0], plane))
+    print pointsOnPlane
     deleteDupes = set(pointsOnPlane)
     if(len(deleteDupes) > 2):
       raise Exception("Too many points to define a line segment in triangle: " + self.points)

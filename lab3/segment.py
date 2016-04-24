@@ -12,7 +12,7 @@ Due: 4/25
 The line segment class
 """
 
-class segment(object):
+class Segment(object):
   def __init__(self, start, end):
   	self.start = start
   	self.end = end
