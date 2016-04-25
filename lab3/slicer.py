@@ -12,6 +12,58 @@ Due: 4/25
 The Main File -- slicer.py
 This file holds all of the main logic to make the slicer run.
 """
+def makePerimeter(segmentsPerLayer):
+  #What do perimeters look like for parallel layers??
+
+  # COME BACK TO THIS IF THE NAIVE SOLUTION IS TOO SLOW
+  # pieceDic = {}
+  # puzzlePieces = []
+  # final = []
+  # for seg in segmentsPerLayer:
+  #   if seg.getHashStringStart in pieceDic:
+  #     puzzlePieces.append(list(seg.end, seg.start, pieceDic[seg.getHashStringStart]))
+  #     del pieceDic[seg.getHashStringStart]
+  #     continue
+  #   if seg.getHashStringEnd in pieceDic:
+  #     puzzlePieces.append(list(seg.start, seg.end, pieceDic[seg.getHashStringEnd]))
+  #     del pieceDic[seg.getHashStringEnd]
+  #     continue
+  #   pieceDic[seg.getHashStringStart] = seg.end
+
+  # for piece in puzzlePieces:
+
+  #This is the slow solution
+
+  #deep copy
+  segments = list(segmentsPerLayer[1:])
+  final = [segmentsPerLayer[0].start, segmentsPerLayer[0].end]
+  search = segmentsPerLayer[0].end
+  circuitBreaker = 0
+  while segments:
+    if(len(segments) == 1):
+      break
+    #print "Looking for " + str(search)
+    for seg in segments:
+      #print "Considering: " + str(seg)
+      if(str(seg.start) == str(search)):
+        #print "Found it! On line " + str(seg)
+        #print "Adding " + str(seg.end)
+        final.append(seg.end)
+        segments.remove(seg)
+        search = seg.end
+        break
+      if(str(seg.end) == str(search)):
+        #print "Found it! On line " + str(seg)
+        #print "Adding " + str(seg.start)
+        final.append(seg.start)
+        segments.remove(seg)
+        search = seg.start
+        break
+    circuitBreaker += 1
+    if(circuitBreaker > len(segmentsPerLayer)):
+      raise Exception("Fucked")
+      break
+  return final
 
 def main():
   #Step 0: Parse user input to get constants
@@ -46,7 +98,11 @@ def main():
     #Step 5: Run plane intersection test on each triangle, return a line segment
     segmentsPerLayer = []
     for triangle in trianglesConsidered:
-      segmentsPerLayer.extend(triangle.intersectPlane(cuttingPlane, thickness))
+      #testing for the parallel case
+      if(cuttingPlane.normal.z == abs(triangle.normal.z) and triangle.normal.x == 0 and triangle.normal.y == 0):
+        triangle._parallelIntersection(thickness, triangle.normal.z)
+      else:
+        segmentsPerLayer.extend(triangle.intersectPlane(cuttingPlane, thickness))
     # What if the triangle is paralell to the plane??
       #Run special function to create line segments based on filament width
     # What if the triangle intersects at only one point??
@@ -60,6 +116,9 @@ def main():
         print str(seggy)
     #sorted insertion?
     #sort into different perimeters
+    perimeter = makePerimeter(segmentsPerLayer)
+    for boob in perimeter:
+      print boob
     #Step 6: Arrange the line segments so they are contiguous, that one ends where the other begins
     #Step 7: Loop over all line segments in data structure, output print head moves in gcode
     # What about when there are multiple perameters per layer??
