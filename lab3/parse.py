@@ -21,12 +21,13 @@ def parseInput():
   args = parser.parse_args()
 
   # do defaults for now, worry about parsing properly later
+  perimeterLayers = 2
   infill = 0.20
   layerHeight = 0.19
-  thickness = 1.75    # diameter of filament
+  thickness = 0.4     # thickness of the filament when extruded (size of nozzle)
   support = False
 
-  return (args.path, infill, layerHeight, thickness, support)
+  return (args.path, perimeterLayers, infill, layerHeight, thickness, support)
 
 
 def parseSTL(filename):

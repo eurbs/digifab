@@ -12,6 +12,19 @@ Due: 4/25
 The Main File -- slicer.py
 This file holds all of the main logic to make the slicer run.
 """
+
+class Parameters(object):
+  """Class used to pass parameters to gcode parsing functions"""
+  def __init__(self, filename, perimeterLayers, infill, layerHeight, thickness, support):
+    self.stlfilename = filename
+    self.gcodefilename = filename.split(".")[0] + ".gcode"
+    self.perimeterLayers = perimeterLayers
+    self.infill = infill
+    self.layerHeight = layerHeight
+    self.thickness = thickness
+    self.support = support
+    self.temperature = 210
+
 def makePerimeter(segmentsPerLayer):
   #What do perimeters look like for parallel layers??
 
@@ -67,7 +80,8 @@ def makePerimeter(segmentsPerLayer):
 
 def main():
   #Step 0: Parse user input to get constants
-  filename, infill, layerHeight, thickness, support = parseInput()
+  filename, perimeterLayers, infill, layerHeight, thickness, support = parseInput()
+  params = Parameters(filename, perimeterLayers, infill, layerHeight, thickness, support)
   
   #Step 1: Parse the STL into a list of triangles
   # TODO: force z's into multiples of the layerHeight
@@ -110,10 +124,10 @@ def main():
     # What if a triangle lies between two cutting planes?
       # check for intersections on the (previous, current] cutting planes interval
     # Store line segment x,y in a data structure (list?)
-    print
-    print "Layer #" + str(layer)
-    for seggy in segmentsPerLayer:
-        print str(seggy)
+    # print
+    # print "Layer #" + str(layer)
+    # for seggy in segmentsPerLayer:
+    #     print str(seggy)
     #sorted insertion?
     #sort into different perimeters
     perimeter = makePerimeter(segmentsPerLayer)
@@ -134,6 +148,10 @@ def main():
   #others:
   # infill
   # supports
+  # centering the object for gcode
+  # different speeds for extrude/non-extrude moves
+  # draw the circle around the object to get the extrusion going
+  # support zhops on non-extrusion moves
 
 if __name__ == "__main__":
   main()
