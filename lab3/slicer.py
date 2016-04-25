@@ -1,5 +1,6 @@
-from triangle import *
 from parse import *
+from triangle import *
+import sys
 """
 Emilee Urbanek and Nick Confrey
 CMSC 22010: Digital Fabrication
@@ -17,10 +18,15 @@ def main():
 	filename, infill, layerHeight, filamentThickness, support = parseInput()
 	
 	#Step 1: Parse the STL into a list of triangles
+	triangles = parseSTL(filename)
 
 	#Step 2: Sort the list of triangles by minZ
+	triangles.sort(key=lambda x: x.z_min)
+
 	# Find top of object (largest maxZ of triangles)
-	top = 100
+	triangles_dup = list(triangles)
+	triangles_dup.sort(key=lambda x: x.z_max, reverse=True)
+	top = triangles[0].z_max
 
 	#Step 3: Define a cutting plane (start at z = 0, increment by layer thickness)
 	cuttingPlane = Plane()
@@ -28,6 +34,7 @@ def main():
 	# Iterate increasing the z value of the plane by layer thickness until = top
 	while(layer <= top):
 		#Step 4: Determine subset of triangles within cutting plane, throw rest away
+		# TODO
 		trianglesConsidered = []
 		"""Testing Data"""
 		p1 = Point3D(-1,0,0)
@@ -63,6 +70,6 @@ def main():
 	# supports
 
 if __name__ == "__main__":
-  main()
+	main()
 
 
