@@ -23,15 +23,12 @@ extruded = 0.0
 
 def updateExtruded(increment):
   global extruded
-  print "updating extruded."  # DEBUG
-  print "was {}, increment is {}".format(extruded, increment) # DEBUG
   extruded += increment
-  print "now {}".format(extruded) # DEBUG
 
 def calculateExtrudeAmount(x1, y1, x2, y2, thickness):
   """Calculates the extrude amount moving from (x1, y1) to (x2, y2)"""
   # TODO: this is messed up somehow
-  dist = math.sqrt(math.pow(x2-x1, 2) + math.pow(x2-x1, 2))
+  dist = math.sqrt(math.pow(x2-x1, 2) + math.pow(y2-y1, 2))
   amt = thickness * dist
   return amt
 
