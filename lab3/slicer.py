@@ -15,7 +15,7 @@ This file holds all of the main logic to make the slicer run.
 
 def main():
   #Step 0: Parse user input to get constants
-  filename, infill, layerHeight, filamentThickness, support = parseInput()
+  filename, infill, layerHeight, thickness, support = parseInput()
   
   #Step 1: Parse the STL into a list of triangles
   # TODO: force z's into multiples of the layerHeight
@@ -31,13 +31,22 @@ def main():
   cuttingPlane = Plane()
   layer = 0.0
   # Iterate increasing the z value of the plane by layer thickness until = top
+
+  trianglesConsidered = []
+  # """Testing Data"""
+  # p1 = Point3D(-1,3,0)
+  # p2 = Point3D(1,5,0)
+  # p3 = Point3D(0,0,0)
+  # trianglesConsidered.append(Triangle([p1,p2,p3],Point3D([0,0,1])))
+
   while(layer <= top):
     #Step 4: Determine subset of triangles within cutting plane, throw rest away
     trianglesConsidered = filter(lambda x: (x.z_min <= layer) and (x.z_max >= layer), triangles)
 
     #Step 5: Run plane intersection test on each triangle, return a line segment
+    segmentsPerLayer = []
     for triangle in trianglesConsidered:
-      print triangle.intersectPlane(cuttingPlane)
+      segmentsPerLayer.extend(triangle.intersectPlane(cuttingPlane, thickness))
     # What if the triangle is paralell to the plane??
       #Run special function to create line segments based on filament width
     # What if the triangle intersects at only one point??
@@ -45,6 +54,10 @@ def main():
     # What if a triangle lies between two cutting planes?
       # check for intersections on the (previous, current] cutting planes interval
     # Store line segment x,y in a data structure (list?)
+    print
+    print "Layer #" + str(layer)
+    for seggy in segmentsPerLayer:
+        print str(seggy)
     #sorted insertion?
     #sort into different perimeters
     #Step 6: Arrange the line segments so they are contiguous, that one ends where the other begins
@@ -65,43 +78,3 @@ def main():
 
 if __name__ == "__main__":
   main()
-
-# THE TEST DATA BECAUSE NICK WOULDN'T PUT IT IN ONE OF THE APPROPRIATE test() FUNCTIONS
-# #Step 3: Define a cutting plane (start at z = 0, increment by layer thickness)
-# cuttingPlane = Plane()
-# layer = 0
-# # Iterate increasing the z value of the plane by layer thickness until = top
-# # trianglesConsidered = filter(lambda x: (x.z_min <= layer) and (x.z_max >= layer), triangles)
-# trianglesConsidered = []
-# """Testing Data"""
-# p1 = Point3D(-1,0,0)
-# p2 = Point3D(1,0,0)
-# p3 = Point3D(0,0,2)
-# top = 2.0
-# trianglesConsidered.append(Triangle([p1,p2,p3],Point3D([0,1,0])))
-# while(layer <= top):
-#   #Step 4: Determine subset of triangles within cutting plane, throw rest away
-#   # TODO
-
-#   #Step 5: Run plane intersection test on each triangle, return a line segment
-#   for triangle in trianglesConsidered:
-#     print triangle.intersectPlane(cuttingPlane)
-#   # What if the triangle is paralell to the plane??
-#     #Run special function to create line segments based on filament width
-#   # What if the triangle intersects at only one point??
-#     #line segment with start and end are the same
-#   # What if a triangle lies between two cutting planes?
-#     # check for intersections on the (previous, current] cutting planes interval
-#   # Store line segment x,y in a data structure (list?)
-#   #sorted insertion?
-#   #sort into different perimeters
-#   #Step 6: Arrange the line segments so they are contiguous, that one ends where the other begins
-#   #Step 7: Loop over all line segments in data structure, output print head moves in gcode
-#   # What about when there are multiple perameters per layer??
-#   # How to optimize non-printing head moves??
-#   #Step 8: Output gcode raise head by layer thickness
-
-#   #Loop until top
-#   layer += layerHeight
-#   cuttingPlane.up(layer)
-

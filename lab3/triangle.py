@@ -63,6 +63,26 @@ class Triangle(object):
         max_z = point.z
     return max_z
 
+  def _getMinY(self):
+    """Returns the minimum y value"""
+    min_y = None
+    for point in self.points:
+      if min_y is None:
+        min_y = point.y
+      elif point.y < min_y:
+        min_y = point.y
+    return min_y
+
+  def _getMaxY(self):
+    """Returns the maximum y value"""
+    max_y = None
+    for point in self.points:
+      if max_y is None:
+        max_y = point.y
+      elif point.y > max_y:
+        max_y = point.z
+    return max_y
+
   def _segmentPlaneIntersection(self, p1, p2, plane):
     """ Used as a helper in plane triangle intersection """
     #an arbitrary small number to deal with numerical percision issues
@@ -95,17 +115,74 @@ class Triangle(object):
     pointsOnPlane.append(Point3D(list(numpy.add(p1.a, temp2))))
     return pointsOnPlane
 
-  def _parallelIntersection(self):
+  def _fillBottomFlatTriangle(self, v1, v2, v3, z, thickness):
+    lineSeggies = []
+    inverseSlope1 = (v2.x - v1.x) / (v2.y - v1.y)
+    inverseSlope2 = (v3.x - v1.x) / (v3.y - v1.y)
+
+    countingX1 = v1.x
+    countingX2 = v1.x
+    scanLineY = v1.y
+    #print "v1 " + str(v1.y) + " v2 " + str(v2.y)
+    while(scanLineY >= v2.y): # emilee: flipped sign? more bugs? i told you so.
+      start = Point3D(countingX1, scanLineY, z)
+      end = Point3D(countingX2, scanLineY, z)
+      #print "start: " + str(start) + "end: " + str(end)
+      lineSeggies.append(Segment(start, end))
+
+      countingX1 += inverseSlope1
+      countingX2 += inverseSlope2
+      #This might be broken here... good place to come back to
+      #Do i need to multiply the slope by thickness? does each step step enough
+      scanLineY -= thickness  # emilee: i told you so
+    return lineSeggies
+
+  def _fillTopFlatTriangle(self, v1, v2, v3, z, thickness):
+    lineSeggies = []
+    inverseSlope1 = (v3.x - v1.x) / (v3.y - v1.y)
+    inverseSlope2 = (v3.x - v2.x) / (v3.y - v2.y)
+
+    countingX1 = v3.x
+    countingX2 = v3.x
+    scanLineY = v3.y
+    while(scanLineY < v1.y):
+      start = Point3D(countingX1, scanLineY, z)
+      end = Point3D(countingX2, scanLineY, z)
+      lineSeggies.append(Segment(start, end))
+
+      countingX1 -= inverseSlope1
+      countingX2 -= inverseSlope2
+      #This might be broken here... good place to come back to
+      #Do i need to multiply the slope by thickness? does each step step enough
+      scanLineY += thickness
+    return lineSeggies
+
+  def _parallelIntersection(self, thickness, z):
     """
     Create line segments across the entire triangle.
     All line segments start from negative x and end from a more positive x
+    Raster up y
     """
-    raise Exception("Its parallel! AHHHHHHHH")
-    return None
+    #Sort by assending y coordinates so v1 is the top
+    self.points.sort(key=lambda p: p.y, reverse=True)
 
-  def intersectPlane(self, plane):
-    if(plane.normal.z == self.normal.z and self.normal.x == 0 and self.normal.y == 0):
-      return self.parallelIntersection()
+    #check for trivial case of flat bottom triangle
+    if(self.points[1].y == self.points[2].y):
+      return self._fillBottomFlatTriangle(self.points[0], self.points[1], self.points[2], z, thickness)
+    if(self.points[0].y == self.points[1].y):
+      return self._fillTopFlatTriangle(self.points[0], self.points[1], self.points[2], z, thickness)
+
+    #Else for the general case need to split the triangle into a topper and a bottomer
+    v4x = (self.points[0].x + ((float)(self.points[1].y - self.points[0].y) / (self.points[2].y - self.points[0].y)) * (self.points[2].x - self.points[0].x))
+    v4 = Point3D(v4x, self.points[1].y, z)
+    lineSeggies = self._fillBottomFlatTriangle(self.points[0], self.points[1], v4, z, thickness)
+    lineSeggies.extend(self._fillTopFlatTriangle(self.points[1], v4, self.points[2], z, thickness))
+    return lineSeggies
+
+  def intersectPlane(self, plane, thickness):
+    if(plane.normal.z == abs(self.normal.z) and self.normal.x == 0 and self.normal.y == 0):
+      #print "OH FUCKIN A WILD PARRALEL APPEARED"
+      return self._parallelIntersection(thickness, self.normal.z)
 
     pointsOnPlane = []
     #print "Points 1 and 2:"
@@ -115,17 +192,22 @@ class Triangle(object):
     #print "Points 3 and 0:"
     pointsOnPlane.extend(self._segmentPlaneIntersection(self.points[2], self.points[0], plane))
     deleteDupes = set(pointsOnPlane)
-    #print pointsOnPlane
+    #for point in pointsOnPlane:
+    #  print point
     if(len(deleteDupes) > 2):
-      raise Exception("Too many points to define a line segment in triangle: " + self.points)
+      print self
+      print "Uh oh! We have " + str(len(deleteDupes)) + " points to make lines out of"
+      for point in deleteDupes:
+        print str(point)
+      raise Exception("Too many points to define a line segment in triangle: " + str(self.points))
     seggy = list(deleteDupes)
     if(len(seggy) == 0):
       # triangle does not intersect plane
       return None
     if(len(seggy) == 1):
       # triangle intersects plane at single point
-      return Segment(seggy[0], seggy[0])
-    return Segment(seggy[0], seggy[1])
+      return [Segment(seggy[0], seggy[0])]
+    return [Segment(seggy[0], seggy[1])]
 
 
 def test():
