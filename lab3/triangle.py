@@ -104,7 +104,7 @@ class Triangle(object):
     return None
 
   def intersectPlane(self, plane):
-    if(plane.normal.z == self.normal.z and self.normal.x == 0 and self.normal.y):
+    if(plane.normal.z == self.normal.z and self.normal.x == 0 and self.normal.y == 0):
       return self.parallelIntersection()
 
     pointsOnPlane = []
@@ -120,7 +120,11 @@ class Triangle(object):
       raise Exception("Too many points to define a line segment in triangle: " + self.points)
     seggy = list(deleteDupes)
     if(len(seggy) == 0):
+      # triangle does not intersect plane
       return None
+    if(len(seggy) == 1):
+      # triangle intersects plane at single point
+      return Segment(seggy[0], seggy[0])
     return Segment(seggy[0], seggy[1])
 
 

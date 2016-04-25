@@ -24,24 +24,15 @@ def main():
   triangles.sort(key=lambda x: x.z_min)
 
   # Find top of object (largest maxZ of triangles)
-  triangles_dup = list(triangles)
-  triangles_dup.sort(key=lambda x: x.z_max, reverse=True)
-  top = triangles[0].z_max
+  top = max(triangles, key=lambda x: x.z_max).z_max
 
   #Step 3: Define a cutting plane (start at z = 0, increment by layer thickness)
   cuttingPlane = Plane()
-  layer = 0
+  layer = 0.0
   # Iterate increasing the z value of the plane by layer thickness until = top
-  trianglesConsidered = []
-  """Testing Data"""
-  p1 = Point3D(-1,0,0)
-  p2 = Point3D(1,0,0)
-  p3 = Point3D(0,0,2)
-  top = 2.0
-  trianglesConsidered.append(Triangle([p1,p2,p3],Point3D([0,1,0])))
   while(layer <= top):
     #Step 4: Determine subset of triangles within cutting plane, throw rest away
-    # TODO
+    trianglesConsidered = filter(lambda x: (x.z_min <= layer) and (x.z_max >= layer), triangles)
 
     #Step 5: Run plane intersection test on each triangle, return a line segment
     for triangle in trianglesConsidered:
@@ -73,3 +64,43 @@ def main():
 
 if __name__ == "__main__":
   main()
+
+# THE TEST DATA BECAUSE NICK WOULDN'T PUT IT IN ONE OF THE APPROPRIATE test() FUNCTIONS
+# #Step 3: Define a cutting plane (start at z = 0, increment by layer thickness)
+# cuttingPlane = Plane()
+# layer = 0
+# # Iterate increasing the z value of the plane by layer thickness until = top
+# # trianglesConsidered = filter(lambda x: (x.z_min <= layer) and (x.z_max >= layer), triangles)
+# trianglesConsidered = []
+# """Testing Data"""
+# p1 = Point3D(-1,0,0)
+# p2 = Point3D(1,0,0)
+# p3 = Point3D(0,0,2)
+# top = 2.0
+# trianglesConsidered.append(Triangle([p1,p2,p3],Point3D([0,1,0])))
+# while(layer <= top):
+#   #Step 4: Determine subset of triangles within cutting plane, throw rest away
+#   # TODO
+
+#   #Step 5: Run plane intersection test on each triangle, return a line segment
+#   for triangle in trianglesConsidered:
+#     print triangle.intersectPlane(cuttingPlane)
+#   # What if the triangle is paralell to the plane??
+#     #Run special function to create line segments based on filament width
+#   # What if the triangle intersects at only one point??
+#     #line segment with start and end are the same
+#   # What if a triangle lies between two cutting planes?
+#     # check for intersections on the (previous, current] cutting planes interval
+#   # Store line segment x,y in a data structure (list?)
+#   #sorted insertion?
+#   #sort into different perimeters
+#   #Step 6: Arrange the line segments so they are contiguous, that one ends where the other begins
+#   #Step 7: Loop over all line segments in data structure, output print head moves in gcode
+#   # What about when there are multiple perameters per layer??
+#   # How to optimize non-printing head moves??
+#   #Step 8: Output gcode raise head by layer thickness
+
+#   #Loop until top
+#   layer += layerHeight
+#   cuttingPlane.up(layer)
+
