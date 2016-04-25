@@ -1,4 +1,6 @@
 import math
+from point3d import Point3D
+from slicer import Parameters # this will probs be circular, put Parametes in parse.py
 """
 Emilee Urbanek and Nick Confrey
 CMSC 22010: Digital Fabrication
@@ -21,12 +23,17 @@ extruded = 0.0
 
 def updateExtruded(increment):
   global extruded
+  print "updating extruded."  # DEBUG
+  print "was {}, increment is {}".format(extruded, increment) # DEBUG
   extruded += increment
+  print "now {}".format(extruded) # DEBUG
 
 def calculateExtrudeAmount(x1, y1, x2, y2, thickness):
   """Calculates the extrude amount moving from (x1, y1) to (x2, y2)"""
+  # TODO: this is messed up somehow
   dist = math.sqrt(math.pow(x2-x1, 2) + math.pow(x2-x1, 2))
-  return thickness * dist
+  amt = thickness * dist
+  return amt
 
 
 
@@ -55,11 +62,11 @@ def generateSetup(gfile, params):
   gfile.write("; SETUP\n")
   lines = [
     "M107 ; fan off",
-    "M104 S{d} ; set temperature".format(params.temperature),
+    "M104 S{} ; set temperature".format(params.temperature),
     "G28 X0 Y0 Z0 ; home all axes",
     "G1 Z5 F5000 ; lift nozzle",
     "",
-    "M109 S{d} ; wait for temperature to be reached".format(params.temperature),
+    "M109 S{} ; wait for temperature to be reached".format(params.temperature),
     "G21 ; set units to millimeters",
     "G90 ; use absolute coordinates",
     "M82 ; use absolute distances for extrusion",
@@ -83,9 +90,24 @@ def generateGCode(gfile, params, layerZ, perimeters):
   perimeters -- A list of lists of points represeting perimeters passed in by slicer.py 
   """
 
-  gfile.write("; LAYER Z={:3.3f}\n".format())
+  gfile.write("; LAYER Z={:3.3f}\n".format(layerZ))
+  gfile.write("G1 Z{:3.3f} ; raise print head\n".format(layerZ))
   lines = []
-  
+  # TODO: handle parallel "perimeters" (actually areas)
+  for i, perim in enumerate(perimeters):
+    lines.append("; PERIMETER {}".format(i))
+    first_point =  perim[0]
+    lines.append("G1 X{:3.3f} Y{:3.3f}".format(first_point.x, first_point.y)) # move no extrude
+    for j in xrange(len(perim)-1):
+      point_start = perim[j]
+      point_end = perim[j+1]
+      # TODO: extrude isn't always working, fix this.
+      extrude_amount = calculateExtrudeAmount(
+        point_start.x, point_start.y, point_end.x, point_end.y, params.thickness)
+      updateExtruded(extrude_amount)
+      lines.append("G1 X{:3.3f} Y{:3.3f} E{:3.3f}".format(
+        point_end.x, point_end.y, extruded)) # move with extrude
+
   lines.append("")
   gfile.write("\n".join(lines))
 
@@ -102,3 +124,39 @@ def generateCleanup(gfile):
     ""
   ]
   gfile.write("\n".join(lines))
+
+def test():
+  """Because we're not using a real testing framework"""
+  params = Parameters(filename="notused", perimeterLayers=1, infill=.20,
+                      layerHeight=.19, thickness=0.4, support=False)
+
+  # Test data from layer 0.19 of the 3mmBox
+  perimeter = [
+    Point3D(10, 15, .19),
+    Point3D(10, 5.6333, .19), # where does this number come from??? (5.6333)
+    Point3D(10, 5, .19),
+    Point3D(10, -4.3667, .19),
+    Point3D(10, -5, .19),
+    Point3D(19.36667, -5, .19),
+    Point3D(20, -5, .19),
+    Point3D(29.36667, -5, .19),
+    Point3D(30, -5, .19),
+    Point3D(30, 4.36667, .19),
+    Point3D(30, 5, .19),
+    Point3D(30, 14.36667, .19),
+    Point3D(30, 15, .19),
+    Point3D(20.63333, 15, .19),
+    Point3D(20, 15, .19),
+    Point3D(10.63333, 15, .19),
+    Point3D(10, 15, .19),       # return to first point
+  ]
+  perimeters = [perimeter]
+  with open("test_gcode.gcode", "w") as gfile:
+    generateSetup(gfile, params)
+    generateGCode(gfile, params, 0.0, perimeters)
+    generateCleanup(gfile)
+
+  print "success"
+
+if __name__ == "__main__":
+  test()
