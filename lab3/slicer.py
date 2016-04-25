@@ -41,6 +41,8 @@ def main():
 			#Run special function to create line segments based on filament width
 		# What if the triangle intersects at only one point??
 			#line segment with start and end are the same
+		# What if a triangle lies between two cutting planes?
+			# check for intersections on the (previous, current] cutting planes interval
 		# Store line segment x,y in a data structure (list?)
 		#sorted insertion?
 		#sort into different perimeters
