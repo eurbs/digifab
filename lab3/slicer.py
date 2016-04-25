@@ -18,6 +18,7 @@ def main():
   filename, infill, layerHeight, filamentThickness, support = parseInput()
   
   #Step 1: Parse the STL into a list of triangles
+  # TODO: force z's into multiples of the layerHeight
   triangles = parseSTL(filename)
 
   #Step 2: Sort the list of triangles by minZ
