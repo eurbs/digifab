@@ -131,8 +131,7 @@ def main():
     #sorted insertion?
     #sort into different perimeters
     perimeter = makePerimeter(segmentsPerLayer)
-    for boob in perimeter:
-      print boob
+    
     #Step 6: Arrange the line segments so they are contiguous, that one ends where the other begins
     #Step 7: Loop over all line segments in data structure, output print head moves in gcode
     # What about when there are multiple perameters per layer??
