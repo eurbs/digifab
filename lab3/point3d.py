@@ -11,11 +11,10 @@ class Point3D(object):
     self.x = float(x)
     self.y = float(y)
     self.z = float(z)
+    self.a = [self.x, self.y, self.z]
 
   def __str__(self):
     return "point: {:.5f} {:.5f} {:.5f}".format(self.x, self.y, self.z)
-
-    self.a = [self.x, self.y, self.z]
 
   def getArray(self):
     """Returns the array representation of the point with x,y,z respectively"""

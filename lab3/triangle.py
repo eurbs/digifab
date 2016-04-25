@@ -93,10 +93,20 @@ class Triangle(object):
     # P1 + place * (P2 - P1)
     temp1 = numpy.subtract(p2.a, p1.a)
     temp2 = numpy.multiply(temp1, place)
-    pointsOnPlane.append(list(numpy.add(p1.a, temp2)))
+    pointsOnPlane.append(Point3D(list(numpy.add(p1.a, temp2))))
     return pointsOnPlane
 
+  def _parallelIntersection(self):
+    """
+    Create line segments across the entire triangle.
+    All line segments start from negative x and end from a more positive x
+    """
+    return None
+
   def intersectPlane(self, plane):
+    if(plane.normal.z == self.normal.z and self.normal.x == 0 and self.normal.y):
+      return self.parallelIntersection()
+
     pointsOnPlane = []
     pointsOnPlane.extend(self._segmentPlaneIntersection(self.points[0], self.points[1], plane))
     pointsOnPlane.extend(self._segmentPlaneIntersection(self.points[1], self.points[2], plane))
