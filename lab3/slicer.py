@@ -12,10 +12,23 @@ Due: 4/25
 The Main File -- slicer.py
 This file holds all of the main logic to make the slicer run.
 """
+class Parameters(object):
+  """Class used to pass parameters to gcode parsing functions"""
+  def __init__(self, filename, perimeterLayers, infill, layerHeight, thickness, support):
+    self.stlfilename = filename
+    self.gcodefilename = filename.split(".")[0] + ".gcode"
+    self.perimeterLayers = perimeterLayers
+    self.infill = infill
+    self.layerHeight = layerHeight
+    self.thickness = thickness
+    self.support = support
+    self.temperature = 210
+
 
 def main():
   #Step 0: Parse user input to get constants
-  filename, infill, layerHeight, thickness, support = parseInput()
+  filename, perimeterLayers, infill, layerHeight, thickness, support = parseInput()
+  params = Parameters(filename, perimeterLayers, infill, layerHeight, thickness, support)
   
   #Step 1: Parse the STL into a list of triangles
   # TODO: force z's into multiples of the layerHeight
@@ -75,6 +88,10 @@ def main():
   #others:
   # infill
   # supports
+  # centering the object for gcode
+  # different speeds for extrude/non-extrude moves
+  # draw the circle around the object to get the extrusion going
+  # support zhops on non-extrusion moves
 
 if __name__ == "__main__":
   main()
