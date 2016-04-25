@@ -55,6 +55,11 @@ def test():
   point_set.add(point)
   point_set.add(Point3D(1, 2, 3))
   print "hashability is good: {}".format(len(point_set) == 1)
+  print "--------------constructing a point with list--------------"
+  if str(Point3D([4, 5, 6])) == "point: 4.00000 5.00000 6.00000":
+    print "success"
+  else:
+    print "failure"
 
 if __name__ == "__main__":
   test()
