@@ -26,11 +26,7 @@ class Triangle(object):
       self.normal = normal
     else:
       self.calculateNormal()
-    # Experimental portion below
-    # note: in a triangle, will there ever be a z lower or higher than a z
-    #       in one of its three points? In other words, will the max z ever
-    #       be along one of the line segments?
-    #       Right now I'm assuming the min is in the top or bottom
+
     self.z_min = self._getMinZ()
     self.z_max = self._getMaxZ()
 
