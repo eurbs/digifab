@@ -31,7 +31,7 @@ class Triangle(object):
     self.z_max = self._getMaxZ()
 
   def __str__(self):
-    return "normal: {!s}\n vertices:\n\t{!s}\n\t{!s}\n\t{!s}".format(
+    return "triangle:\n\tnormal: {!s}\n vertices:\n\t{!s}\n\t{!s}\n\t{!s}".format(
       self.normal, self.points[0], self.points[1], self.points[2])
 
   def calculateNormal(self):

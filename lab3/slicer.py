@@ -37,6 +37,7 @@ def main():
   p1 = Point3D(-1,0,0)
   p2 = Point3D(1,0,0)
   p3 = Point3D(0,0,2)
+  top = 2.0
   trianglesConsidered.append(Triangle([p1,p2,p3],Point3D([0,1,0])))
   while(layer <= top):
     #Step 4: Determine subset of triangles within cutting plane, throw rest away
