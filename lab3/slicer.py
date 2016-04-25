@@ -88,6 +88,11 @@ def makePerimeter(segmentsPerLayer):
     if(circuitBreaker > len(segmentsPerLayer)):
       raise Exception("Unable to find match for perimeter")
       break
+
+  # append first point of each perimeter to end of list
+  for i in xrange(len(final)):
+    final[i].append(final[i][0])
+
   return final
 
 def main():
@@ -143,12 +148,13 @@ def main():
     #     print str(seggy)
     #sorted insertion?
     #sort into different perimeters
+
+    #Step 6: Arrange the line segments so they are contiguous, that one ends where the other begins
     perimeter = makePerimeter(segmentsPerLayer)
     for i,perm in enumerate(perimeter):
       print "Perimeter #" + str(i)
       for per in perm:
         print "\t " + str(per)
-    #Step 6: Arrange the line segments so they are contiguous, that one ends where the other begins
     #Step 7: Loop over all line segments in data structure, output print head moves in gcode
     # What about when there are multiple perameters per layer??
     # How to optimize non-printing head moves??
@@ -167,6 +173,7 @@ def main():
   # different speeds for extrude/non-extrude moves
   # draw the circle around the object to get the extrusion going
   # support zhops on non-extrusion moves
+  # avoid overlaps in perimeters (when drawing, the final point is shorter by .4mm)
 
 if __name__ == "__main__":
   main()
