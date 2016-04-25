@@ -180,7 +180,8 @@ class Triangle(object):
     return lineSeggies
 
   def intersectPlane(self, plane, thickness):
-    if(plane.normal.z == self.normal.z and self.normal.x == 0 and self.normal.y == 0):
+    if(plane.normal.z == abs(self.normal.z) and self.normal.x == 0 and self.normal.y == 0):
+      #print "OH FUCKIN A WILD PARRALEL APPEARED"
       return self._parallelIntersection(thickness, self.normal.z)
 
     pointsOnPlane = []
@@ -191,8 +192,13 @@ class Triangle(object):
     #print "Points 3 and 0:"
     pointsOnPlane.extend(self._segmentPlaneIntersection(self.points[2], self.points[0], plane))
     deleteDupes = set(pointsOnPlane)
-    #print pointsOnPlane
+    #for point in pointsOnPlane:
+    #  print point
     if(len(deleteDupes) > 2):
+      print self
+      print "Uh oh! We have " + str(len(deleteDupes)) + " points to make lines out of"
+      for point in deleteDupes:
+        print str(point)
       raise Exception("Too many points to define a line segment in triangle: " + str(self.points))
     seggy = list(deleteDupes)
     if(len(seggy) == 0):

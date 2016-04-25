@@ -54,6 +54,10 @@ def main():
     # What if a triangle lies between two cutting planes?
       # check for intersections on the (previous, current] cutting planes interval
     # Store line segment x,y in a data structure (list?)
+    print
+    print "Layer #" + str(layer)
+    for seggy in segmentsPerLayer:
+        print str(seggy)
     #sorted insertion?
     #sort into different perimeters
     #Step 6: Arrange the line segments so they are contiguous, that one ends where the other begins
