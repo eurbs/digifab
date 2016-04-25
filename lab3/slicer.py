@@ -49,32 +49,44 @@ def makePerimeter(segmentsPerLayer):
 
   #deep copy
   segments = list(segmentsPerLayer[1:])
-  final = [segmentsPerLayer[0].start, segmentsPerLayer[0].end]
+  final = [[segmentsPerLayer[0].start, segmentsPerLayer[0].end]]
   search = segmentsPerLayer[0].end
   circuitBreaker = 0
+  #stores number of perimeters per layer we've found so far
+  perimeterNumber = 0
   while segments:
     if(len(segments) == 1):
       break
     #print "Looking for " + str(search)
+    found = False
     for seg in segments:
       #print "Considering: " + str(seg)
       if(str(seg.start) == str(search)):
         #print "Found it! On line " + str(seg)
         #print "Adding " + str(seg.end)
-        final.append(seg.end)
+        final[perimeterNumber].append(seg.end)
         segments.remove(seg)
         search = seg.end
+        found = True
         break
       if(str(seg.end) == str(search)):
         #print "Found it! On line " + str(seg)
         #print "Adding " + str(seg.start)
-        final.append(seg.start)
+        final[perimeterNumber].append(seg.start)
         segments.remove(seg)
         search = seg.start
+        found = True
         break
+    if(not found):
+      perimeterNumber += 1
+      final.append([segments[0].start, segments[0].end])
+      search = segments[0].end
+      segments.pop(0)
+
+    #to avoid infinite loops
     circuitBreaker += 1
     if(circuitBreaker > len(segmentsPerLayer)):
-      raise Exception("Fucked")
+      raise Exception("Unable to find match for perimeter")
       break
   return final
 
@@ -114,6 +126,7 @@ def main():
     for triangle in trianglesConsidered:
       #testing for the parallel case
       if(cuttingPlane.normal.z == abs(triangle.normal.z) and triangle.normal.x == 0 and triangle.normal.y == 0):
+        # THIS IS WHERE YOU WOULD DO SOMETHING WITH THE RASTER LAYER
         triangle._parallelIntersection(thickness, triangle.normal.z)
       else:
         segmentsPerLayer.extend(triangle.intersectPlane(cuttingPlane, thickness))
@@ -124,14 +137,17 @@ def main():
     # What if a triangle lies between two cutting planes?
       # check for intersections on the (previous, current] cutting planes interval
     # Store line segment x,y in a data structure (list?)
-    # print
-    # print "Layer #" + str(layer)
+    print
+    print "Layer #" + str(layer)
     # for seggy in segmentsPerLayer:
     #     print str(seggy)
     #sorted insertion?
     #sort into different perimeters
     perimeter = makePerimeter(segmentsPerLayer)
-    
+    for i,perm in enumerate(perimeter):
+      print "Perimeter #" + str(i)
+      for per in perm:
+        print "\t " + str(per)
     #Step 6: Arrange the line segments so they are contiguous, that one ends where the other begins
     #Step 7: Loop over all line segments in data structure, output print head moves in gcode
     # What about when there are multiple perameters per layer??
