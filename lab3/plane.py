@@ -20,7 +20,8 @@ class Plane(object):
 
   def distanceFrom(self, point):
   	""" returns the distance of a point from this plane """
-  	return numpy.dot(self.normal.getArray(),point.getArray()) + self.distance
+  	return numpy.dot(self.normal.a,point.a) + self.distance
 
   def up(self, increment):
-  	self.normal.z = increment
+  	#Moving away from the origin is more negative
+  	self.distance = increment * -1
