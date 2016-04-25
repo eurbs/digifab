@@ -16,6 +16,7 @@ This file holds all of the main logic to make the slicer run.
 class Parameters(object):
   """Class used to pass parameters to gcode parsing functions"""
   def __init__(self, filename, perimeterLayers, infill, layerHeight, thickness, support):
+    # TODO: should handle defaults here instead of in parse.py
     self.stlfilename = filename
     self.gcodefilename = filename.split(".")[0] + ".gcode"
     self.perimeterLayers = perimeterLayers

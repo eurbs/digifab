@@ -21,6 +21,7 @@ def parseInput():
   args = parser.parse_args()
 
   # do defaults for now, worry about parsing properly later
+  # TODO: properly parse options
   perimeterLayers = 2
   infill = 0.20
   layerHeight = 0.19
