@@ -18,29 +18,30 @@ def main():
   filename, infill, layerHeight, thickness, support = parseInput()
   
   #Step 1: Parse the STL into a list of triangles
+  # TODO: force z's into multiples of the layerHeight
   triangles = parseSTL(filename)
 
   #Step 2: Sort the list of triangles by minZ
   triangles.sort(key=lambda x: x.z_min)
 
   # Find top of object (largest maxZ of triangles)
-  triangles_dup = list(triangles)
-  triangles_dup.sort(key=lambda x: x.z_max, reverse=True)
-  top = triangles[0].z_max
+  top = max(triangles, key=lambda x: x.z_max).z_max
 
   #Step 3: Define a cutting plane (start at z = 0, increment by layer thickness)
   cuttingPlane = Plane()
-  layer = 0
+  layer = 0.0
   # Iterate increasing the z value of the plane by layer thickness until = top
+
   trianglesConsidered = []
-  """Testing Data"""
-  p1 = Point3D(-1,3,0)
-  p2 = Point3D(1,5,0)
-  p3 = Point3D(0,0,0)
-  trianglesConsidered.append(Triangle([p1,p2,p3],Point3D([0,0,1])))
+  # """Testing Data"""
+  # p1 = Point3D(-1,3,0)
+  # p2 = Point3D(1,5,0)
+  # p3 = Point3D(0,0,0)
+  # trianglesConsidered.append(Triangle([p1,p2,p3],Point3D([0,0,1])))
+
   while(layer <= top):
     #Step 4: Determine subset of triangles within cutting plane, throw rest away
-    # TODO
+    trianglesConsidered = filter(lambda x: (x.z_min <= layer) and (x.z_max >= layer), triangles)
 
     #Step 5: Run plane intersection test on each triangle, return a line segment
     segmentsPerLayer = []

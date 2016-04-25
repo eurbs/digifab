@@ -31,7 +31,7 @@ class Triangle(object):
     self.z_max = self._getMaxZ()
 
   def __str__(self):
-    return "normal: {!s}\n vertices:\n\t{!s}\n\t{!s}\n\t{!s}".format(
+    return "triangle:\n\tnormal: {!s}\n vertices:\n\t{!s}\n\t{!s}\n\t{!s}".format(
       self.normal, self.points[0], self.points[1], self.points[2])
 
   def calculateNormal(self):
@@ -196,7 +196,11 @@ class Triangle(object):
       raise Exception("Too many points to define a line segment in triangle: " + str(self.points))
     seggy = list(deleteDupes)
     if(len(seggy) == 0):
+      # triangle does not intersect plane
       return None
+    if(len(seggy) == 1):
+      # triangle intersects plane at single point
+      return [Segment(seggy[0], seggy[0])]
     return [Segment(seggy[0], seggy[1])]
 
 

@@ -14,8 +14,8 @@ The line segment class
 
 class Segment(object):
   def __init__(self, start, end):
-  	self.start = start
-  	self.end = end
+    self.start = start
+    self.end = end
 
   def __str__(self):
-  	return "Start point: " + str(self.start) + " End point: " + str(self.end)
+    return "segment:\n\tstart {!s}\n\t  end {!s}".format(self.start, self.end)

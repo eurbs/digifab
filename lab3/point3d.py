@@ -25,7 +25,7 @@ class Point3D(object):
     self.a = [self.x, self.y, self.z]
 
   def __str__(self):
-    return "point: {:.5f} {:.5f} {:.5f}".format(self.x, self.y, self.z)
+    return "point: {:+.5f} {:+.5f} {:+.5f}".format(self.x, self.y, self.z)
 
   def __hash__(self):
     return hash(str(self))

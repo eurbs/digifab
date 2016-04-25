@@ -23,10 +23,10 @@ def parseInput():
   # do defaults for now, worry about parsing properly later
   infill = 0.20
   layerHeight = 0.19
-  filamentThickness = 1.75
+  thickness = 1.75    # diameter of filament
   support = False
 
-  return (args.path, infill, layerHeight, filamentThickness, support)
+  return (args.path, infill, layerHeight, thickness, support)
 
 
 def parseSTL(filename):
