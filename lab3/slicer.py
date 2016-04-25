@@ -20,20 +20,21 @@ def main():
 
 	#Step 2: Sort the list of triangles by minZ
 	# Find top of object (largest maxZ of triangles)
-	top = 100
+	top = 2
 
 	#Step 3: Define a cutting plane (start at z = 0, increment by layer thickness)
 	cuttingPlane = Plane()
 	layer = 0
 	# Iterate increasing the z value of the plane by layer thickness until = top
+	trianglesConsidered = []
+	"""Testing Data"""
+	p1 = Point3D(-1,0,0)
+	p2 = Point3D(1,0,0)
+	p3 = Point3D(0,0,2)
+	trianglesConsidered.append(Triangle([p1,p2,p3],Point3D([0,1,0])))
 	while(layer <= top):
 		#Step 4: Determine subset of triangles within cutting plane, throw rest away
-		trianglesConsidered = []
-		"""Testing Data"""
-		p1 = Point3D(-1,0,0)
-		p2 = Point3D(1,0,0)
-		p3 = Point3D(0,0,2)
-		trianglesConsidered.append(Triangle([p1,p2,p3],[0,1,0]))
+		
 		#Step 5: Run plane intersection test on each triangle, return a line segment
 		for triangle in trianglesConsidered:
 			print triangle.intersectPlane(cuttingPlane)

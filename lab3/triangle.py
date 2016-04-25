@@ -83,10 +83,13 @@ class Triangle(object):
     if(d2OnPlane):
       pointsOnPlane.append(p2)
     if(d2OnPlane and d1OnPlane):
+      #print "Both on plane error"
       return pointsOnPlane
 
     #if the points are on the same side of the plane, there can be no intersection
+    #print "d1 is " + str(d1) + " d2 is " + str(d2)
     if(d1*d2 > espilon):
+      #print "Same side of plane error"
       return pointsOnPlane
 
     place = d1 / (d1 - d2)
@@ -101,6 +104,7 @@ class Triangle(object):
     Create line segments across the entire triangle.
     All line segments start from negative x and end from a more positive x
     """
+    raise Exception("Its parallel! AHHHHHHHH")
     return None
 
   def intersectPlane(self, plane):
@@ -108,14 +112,20 @@ class Triangle(object):
       return self.parallelIntersection()
 
     pointsOnPlane = []
+    #print "Points 1 and 2:"
     pointsOnPlane.extend(self._segmentPlaneIntersection(self.points[0], self.points[1], plane))
+    #print "Points 2 and 3:"
     pointsOnPlane.extend(self._segmentPlaneIntersection(self.points[1], self.points[2], plane))
+    #print "Points 3 and 0:"
     pointsOnPlane.extend(self._segmentPlaneIntersection(self.points[2], self.points[0], plane))
-    print pointsOnPlane
     deleteDupes = set(pointsOnPlane)
+    #print pointsOnPlane
     if(len(deleteDupes) > 2):
       raise Exception("Too many points to define a line segment in triangle: " + self.points)
-    return segment(deleteDupes[0], deleteDupes[1])
+    seggy = list(deleteDupes)
+    if(len(seggy) == 0):
+      return None
+    return Segment(seggy[0], seggy[1])
 
 
 def test():

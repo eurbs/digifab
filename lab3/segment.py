@@ -16,3 +16,6 @@ class Segment(object):
   def __init__(self, start, end):
   	self.start = start
   	self.end = end
+
+  def __str__(self):
+  	return "Start point: " + str(self.start) + " End point: " + str(self.end)
