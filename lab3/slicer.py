@@ -15,7 +15,7 @@ This file holds all of the main logic to make the slicer run.
 
 def main():
   #Step 0: Parse user input to get constants
-  filename, infill, layerHeight, filamentThickness, support = parseInput()
+  filename, infill, layerHeight, thickness, support = parseInput()
   
   #Step 1: Parse the STL into a list of triangles
   triangles = parseSTL(filename)
@@ -34,17 +34,18 @@ def main():
   # Iterate increasing the z value of the plane by layer thickness until = top
   trianglesConsidered = []
   """Testing Data"""
-  p1 = Point3D(-1,0,0)
-  p2 = Point3D(1,0,0)
-  p3 = Point3D(0,0,2)
-  trianglesConsidered.append(Triangle([p1,p2,p3],Point3D([0,1,0])))
+  p1 = Point3D(-1,3,0)
+  p2 = Point3D(1,5,0)
+  p3 = Point3D(0,0,0)
+  trianglesConsidered.append(Triangle([p1,p2,p3],Point3D([0,0,1])))
   while(layer <= top):
     #Step 4: Determine subset of triangles within cutting plane, throw rest away
     # TODO
 
     #Step 5: Run plane intersection test on each triangle, return a line segment
+    segmentsPerLayer = []
     for triangle in trianglesConsidered:
-      print triangle.intersectPlane(cuttingPlane)
+      segmentsPerLayer.extend(triangle.intersectPlane(cuttingPlane, thickness))
     # What if the triangle is paralell to the plane??
       #Run special function to create line segments based on filament width
     # What if the triangle intersects at only one point??
