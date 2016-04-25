@@ -19,3 +19,9 @@ class Segment(object):
 
   def __str__(self):
     return "segment:\n\tstart {!s}\n\t  end {!s}".format(self.start, self.end)
+
+  def getHashStringStart(self):
+  	return "X" + str(self.start.x) + "Y" + str(self.start.y)
+
+  def getHashStringEnd(self):
+  	return "X" + str(self.end.x) + "Y" + str(self.end.y)

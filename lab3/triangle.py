@@ -180,10 +180,6 @@ class Triangle(object):
     return lineSeggies
 
   def intersectPlane(self, plane, thickness):
-    if(plane.normal.z == abs(self.normal.z) and self.normal.x == 0 and self.normal.y == 0):
-      #print "OH FUCKIN A WILD PARRALEL APPEARED"
-      return self._parallelIntersection(thickness, self.normal.z)
-
     pointsOnPlane = []
     #print "Points 1 and 2:"
     pointsOnPlane.extend(self._segmentPlaneIntersection(self.points[0], self.points[1], plane))
@@ -203,10 +199,11 @@ class Triangle(object):
     seggy = list(deleteDupes)
     if(len(seggy) == 0):
       # triangle does not intersect plane
-      return None
+      return []
     if(len(seggy) == 1):
       # triangle intersects plane at single point
-      return [Segment(seggy[0], seggy[0])]
+      #return [Segment(seggy[0], seggy[0])]
+      return []
     return [Segment(seggy[0], seggy[1])]
 
 
