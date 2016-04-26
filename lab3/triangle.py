@@ -1,6 +1,7 @@
 from point3d import *
 from segment import *
 from plane import *
+from helpers import *
 import math
 
 """
@@ -14,7 +15,8 @@ Due: 4/25
 The Triangle Class
 In-memory representation of the STL triangles.
 """
-episilon = .01
+#Don't push this any lower or the sphere will break
+episilon = .001
 
 class Triangle(object):
   def __init__(self, points, normal=None):
@@ -198,9 +200,6 @@ class Triangle(object):
     lineSeggies.extend(self._fillTopFlatTriangle(self.points[1], v4, self.points[2], z, thickness))
     return lineSeggies
 
-  def isclose(self, a, b, rel_tol=1e-09, abs_tol=0.0):
-    return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
-
   def intersectPlane(self, plane, thickness):
     pointsOnPlane = []
     #print "Points 1 and 2:"
@@ -222,9 +221,9 @@ class Triangle(object):
       for compare in deleteDupes:
         if compare == p:
           continue
-        if(self.isclose(p.x, compare.x, episilon) and
-        self.isclose(p.y, compare.y, episilon) and
-        self.isclose(p.z, compare.z, episilon)):
+        if(isclose(p.x, compare.x, episilon) and
+        isclose(p.y, compare.y, episilon) and
+        isclose(p.z, compare.z, episilon)):
           bad.append(p)
           break
 
