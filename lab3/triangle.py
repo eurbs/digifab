@@ -14,6 +14,7 @@ Due: 4/25
 The Triangle Class
 In-memory representation of the STL triangles.
 """
+episilon = .01
 
 class Triangle(object):
   def __init__(self, points, normal=None):
@@ -197,6 +198,9 @@ class Triangle(object):
     lineSeggies.extend(self._fillTopFlatTriangle(self.points[1], v4, self.points[2], z, thickness))
     return lineSeggies
 
+  def isclose(self, a, b, rel_tol=1e-09, abs_tol=0.0):
+    return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+
   def intersectPlane(self, plane, thickness):
     pointsOnPlane = []
     #print "Points 1 and 2:"
@@ -208,12 +212,22 @@ class Triangle(object):
     deleteDupes = set(pointsOnPlane)
 
     #Sanity check to avoid nan points
+    #And near duplicates - points that are episilon from being the same point
     bad = []
-    for p in deleteDupes:
+    for i,p in enumerate(deleteDupes):
       for coord in p.a:
         if math.isnan(coord):
           bad.append(p)
           break
+      for compare in deleteDupes:
+        if compare == p:
+          continue
+        if(self.isclose(p.x, compare.x, episilon) and
+        self.isclose(p.y, compare.y, episilon) and
+        self.isclose(p.z, compare.z, episilon)):
+          bad.append(p)
+          break
+
     for ugly in bad:
       deleteDupes.remove(ugly)
 
