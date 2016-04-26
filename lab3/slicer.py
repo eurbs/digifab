@@ -39,6 +39,7 @@ def makePerimeter(segmentsPerLayer):
   #This is the slow solution
 
   if(not segmentsPerLayer):
+    print "FUUUUCK"
     return None
   
   #deep copy so we don't mess with the original list
