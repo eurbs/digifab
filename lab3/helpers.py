@@ -13,3 +13,23 @@ episilon = .001
 
 def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
 	return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+
+def floatGE(a, b):
+  """Returns whether or not a >= b"""
+  return a > b or isclose(a, b)
+
+def floatLE(a, b):
+  """Returns whether or not a <= b"""
+  return a < b or isclose(a, b)
+
+def floatGT(a, b):
+  """Returns whether or not a > b"""
+  return (a > b) and (not isclose(a, b))
+
+def floatLT(a, b):
+  """Returns whether or not a < b"""
+  return (a < b) and (not isclose(a, b))
+
+def printFunc(x):
+  """Since Python2 doesn't have a print function"""
+  print x

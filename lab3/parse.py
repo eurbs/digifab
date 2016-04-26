@@ -1,3 +1,4 @@
+from helpers import *
 from triangle import *
 import argparse
 """
@@ -81,10 +82,6 @@ def parseSTL(filename):
         points = []   # Can't wait to move to python 3.3, points.clear() would work
         normal = None
   return triangles
-
-def printFunc(x):
-  """Since Python2 doesn't have a print function"""
-  print x
 
 def test():
   print "--------------parsing stl--------------"
