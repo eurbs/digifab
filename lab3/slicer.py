@@ -1,5 +1,6 @@
 from parse import *
 from triangle import *
+from helpers import *
 import gcode
 import sys
 """
@@ -13,6 +14,7 @@ Due: 4/25
 The Main File -- slicer.py
 This file holds all of the main logic to make the slicer run.
 """
+
 
 def makePerimeter(segmentsPerLayer):
   #What do perimeters look like for parallel layers??
@@ -36,7 +38,10 @@ def makePerimeter(segmentsPerLayer):
 
   #This is the slow solution
 
-  #deep copy
+  if(not segmentsPerLayer):
+    return None
+  
+  #deep copy so we don't mess with the original list
   segments = list(segmentsPerLayer[1:])
   final = [[segmentsPerLayer[0].start, segmentsPerLayer[0].end]]
   search = segmentsPerLayer[0].end
@@ -50,7 +55,7 @@ def makePerimeter(segmentsPerLayer):
     found = False
     for seg in segments:
       #print "Considering: " + str(seg)
-      if(str(seg.start) == str(search)):
+      if(seg.start.close(search)):
         #print "Found it! On line " + str(seg)
         #print "Adding " + str(seg.end)
         final[perimeterNumber].append(seg.end)
@@ -58,7 +63,7 @@ def makePerimeter(segmentsPerLayer):
         search = seg.end
         found = True
         break
-      if(str(seg.end) == str(search)):
+      if(seg.end.close(search)):
         #print "Found it! On line " + str(seg)
         #print "Adding " + str(seg.start)
         final[perimeterNumber].append(seg.start)
@@ -79,6 +84,7 @@ def makePerimeter(segmentsPerLayer):
       break
 
   # append first point of each perimeter to end of list
+  # for each perimeter, make sure that the start and end point are the same
   for i in xrange(len(final)):
     final[i].append(final[i][0])
 
@@ -151,6 +157,10 @@ def main():
     #Step 6: Arrange the line segments so they are contiguous, that one ends where the other begins
     # note: RUNNING INTO PROBLEMS WITH THE SPHERE
     perimeters = makePerimeter(segmentsPerLayer)
+    if(perimeters == None):
+      layer += layerHeight
+      cuttingPlane.up(layer)
+      continue # there's a magical floating object!
     for i,perm in enumerate(perimeters): # DEBUG (for loop)
       print "Perimeter #" + str(i)
       for per in perm:

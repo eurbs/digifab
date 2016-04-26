@@ -1,6 +1,7 @@
 from point3d import *
 from segment import *
 from plane import *
+from helpers import *
 import math
 
 """
@@ -195,8 +196,8 @@ class Triangle(object):
       #print "start: " + str(start) + "end: " + str(end)
       lineSeggies.append(Segment(start, end))
 
-      countingX1 += inverseSlope1
-      countingX2 += inverseSlope2
+      countingX1 -= (inverseSlope1*thickness)
+      countingX2 -= (inverseSlope2*thickness)
       #This might be broken here... good place to come back to
       #Do i need to multiply the slope by thickness? does each step step enough
       scanLineY -= thickness  # emilee: i told you so
@@ -215,8 +216,8 @@ class Triangle(object):
       end = Point3D(countingX2, scanLineY, z)
       lineSeggies.append(Segment(start, end))
 
-      countingX1 -= inverseSlope1
-      countingX2 -= inverseSlope2
+      countingX1 += (inverseSlope1*thickness)
+      countingX2 += (inverseSlope2*thickness)
       #This might be broken here... good place to come back to
       #Do i need to multiply the slope by thickness? does each step step enough
       scanLineY += thickness
@@ -270,8 +271,27 @@ class Triangle(object):
     #print "Points 3 and 0:"
     pointsOnPlane.extend(self._segmentPlaneIntersection(self.points[2], self.points[0], plane))
     deleteDupes = set(pointsOnPlane)
-    #for point in pointsOnPlane:
-    #  print point
+
+    #Sanity check to avoid nan points
+    #And near duplicates - points that are episilon from being the same point
+    bad = []
+    for i,p in enumerate(deleteDupes):
+      for coord in p.a:
+        if math.isnan(coord):
+          bad.append(p)
+          break
+      for compare in deleteDupes:
+        if compare == p:
+          continue
+        if(isclose(p.x, compare.x, episilon) and
+        isclose(p.y, compare.y, episilon) and
+        isclose(p.z, compare.z, episilon)):
+          bad.append(p)
+          break
+
+    for ugly in bad:
+      deleteDupes.remove(ugly)
+
     if(len(deleteDupes) > 2):
       print self
       print "Uh oh! We have " + str(len(deleteDupes)) + " points to make lines out of"
