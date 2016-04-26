@@ -1,4 +1,5 @@
 from point3d import *
+from helpers import *
 import numpy
 
 """

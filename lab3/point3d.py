@@ -1,4 +1,5 @@
 import operator
+from helpers import *
 
 """This section is for things that belong in different files"""
 # Python 2 equivalent for enums for indexing into arrays of x, y, and z
@@ -33,6 +34,13 @@ class Point3D(object):
   def __eq__(self, other):
     """Assumes other is a Point3D as well"""
     return (self.x == other.x) and (self.y == other.y) and (self.z == other.z)
+
+  def close(self, other):
+    #assumes other is also a point
+    x = isclose(float(self.x), float(other.x), episilon)
+    y = isclose(float(self.y), float(other.y), episilon)
+    z = isclose(float(self.z), float(other.z), episilon)
+    return x and y and z
 
   def getArray(self):
     """Returns the array representation of the point with x,y,z respectively"""

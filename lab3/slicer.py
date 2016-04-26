@@ -1,5 +1,6 @@
 from parse import *
 from triangle import *
+from helpers import *
 import gcode
 import sys
 """
@@ -13,6 +14,7 @@ Due: 4/25
 The Main File -- slicer.py
 This file holds all of the main logic to make the slicer run.
 """
+
 
 def makePerimeter(segmentsPerLayer):
   #What do perimeters look like for parallel layers??
@@ -53,7 +55,7 @@ def makePerimeter(segmentsPerLayer):
     found = False
     for seg in segments:
       #print "Considering: " + str(seg)
-      if(str(seg.start) == str(search)):
+      if(seg.start.close(search)):
         #print "Found it! On line " + str(seg)
         #print "Adding " + str(seg.end)
         final[perimeterNumber].append(seg.end)
@@ -61,7 +63,7 @@ def makePerimeter(segmentsPerLayer):
         search = seg.end
         found = True
         break
-      if(str(seg.end) == str(search)):
+      if(seg.end.close(search)):
         #print "Found it! On line " + str(seg)
         #print "Adding " + str(seg.start)
         final[perimeterNumber].append(seg.start)

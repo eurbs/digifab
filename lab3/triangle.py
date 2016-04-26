@@ -15,8 +15,6 @@ Due: 4/25
 The Triangle Class
 In-memory representation of the STL triangles.
 """
-#Don't push this any lower or the sphere will break
-episilon = .001
 
 class Triangle(object):
   def __init__(self, points, normal=None):
