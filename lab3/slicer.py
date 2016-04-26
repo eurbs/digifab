@@ -91,8 +91,12 @@ def main():
   gfile = open(params.gcodefilename, "w") # note: this is NOT good. should open and close each time I want to write to it. to do this, we open in "a" or append mode rather than "w" or write mode
   
   #Step 1: Parse the STL into a list of triangles
-  # TODO: force z's into multiples of the layerHeight
   triangles = parseSTL(filename)
+
+  # TODO: force z's into multiples of the layerHeight
+  # note: below should solve the todo.
+  for triangle in triangles:
+    triangle.adjustToCuttingPlane(params.layerHeight)
 
   #Step 2: Sort the list of triangles by minZ
   triangles.sort(key=lambda x: x.z_min)
@@ -114,6 +118,8 @@ def main():
 
   gcode.generateSetup(gfile, params)
   while(layer <= top):
+    print
+    print "Layer #" + str(layer)
     #Step 4: Determine subset of triangles within cutting plane, throw rest away
     trianglesConsidered = filter(lambda x: (x.z_min <= layer) and (x.z_max >= layer), triangles)
 
@@ -136,8 +142,7 @@ def main():
     # What if a triangle lies between two cutting planes?
       # check for intersections on the (previous, current] cutting planes interval
     # Store line segment x,y in a data structure (list?)
-    print
-    print "Layer #" + str(layer)
+
     # for seggy in segmentsPerLayer:
     #     print str(seggy)
     #sorted insertion?

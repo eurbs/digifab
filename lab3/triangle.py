@@ -1,6 +1,7 @@
 from point3d import *
 from segment import *
 from plane import *
+import math
 
 """
 Emilee Urbanek and Nick Confrey
@@ -14,6 +15,12 @@ The Triangle Class
 In-memory representation of the STL triangles.
 """
 
+# TODO: When importing stl, truncate (or round?) to 3 decimal points
+# TODO: When importing stl, check to see if any triangle is parallel to the z axis
+#       Make a triangle function that checks if all Z points are the same
+# TODO: When importing stl, if there is ever a parallel triangle that is NOT on a cutting plane,
+#       raise those z's
+# TODO: do above, but for when one single line of the triangle intersects the cutting plane
 class Triangle(object):
   def __init__(self, points, normal=None):
     """
@@ -37,6 +44,64 @@ class Triangle(object):
   def calculateNormal(self):
     """Calculates and sets normal of a triangle"""
     raise Exception("Given STL file without normals. Normal calculation not yet supported :(")
+
+  def _isParallelToZ(self):
+    """Calculates if it's parallel to Z"""
+    return (self.points[0].z == self.points[1].z 
+            and self.points[1].z == self.points[2].z 
+            and self.points[2].z == self.points[0].z)
+
+  def _segmentInZ(self):
+    """Calculates if it has one of its sides coincident with Z plane
+    If it has a segment in Z, it returns the indices in a list [first, second]
+    """
+    for i, point in enumerate(self.points):
+      point2idx = (i+1)%3
+      hasSegment = (point.z == self.points[point2idx].z)
+      if hasSegment:
+        return [i, point2idx]
+    return None
+
+  def adjustToCuttingPlane(self, layerHeight):
+    """If a triangle is parallel to or has a side that falls on the Z axis, we
+    adjust those points such that they fall on a cutting plane rather than between
+    cutting planes.
+
+    Assumes 0.001 <= layerHeight < 1mm
+    """
+    # note: these new z's aren't rounded/truncated to 3 decimal places -- may cause problems
+    # TODO: fix truncation
+    segment = self._segmentInZ()
+    mod = int(layerHeight * 1000)
+    if self._isParallelToZ():
+      toMod = int(self.points[0].z * 1000)
+      if (toMod % mod) != 0:
+        # We're not on a cutting plane, move to the next closest one
+        new_z = math.ceil(toMod / float(mod)) * float(mod) / 1000 # Find next closest multiple above
+        new_points = []
+        for point in self.points:
+          new_points.append(Point3D(point.x, point.y, new_z))
+        self.points = new_points
+        # Recalculate the min and max z's
+        self.z_min = self._getMinZ()
+        self.z_max = self._getMaxZ()
+    elif segment:
+      # NICK: this is where a full size is parallel with normal, if you comment this out, things
+      # kind of work, however, you don't get a perimeter at the final layer
+      idx1 = segment[0]
+      idx2 = segment[1]
+      toMod = int(self.points[idx1].z * 1000)
+      if (toMod % mod) != 0:
+        # Not on cutting plane, move this segment to the next closest one above
+        new_z = math.ceil(toMod / float(mod)) * float(mod) / 1000
+        # Update the points in the triangle
+        self.points[idx1] = Point3D(self.points[idx1].x, self.points[idx1].y, new_z)
+        self.points[idx2] = Point3D(self.points[idx2].x, self.points[idx2].y, new_z)
+        # Recalculate the min and max z's
+        self.z_min = self._getMinZ()
+        self.z_max = self._getMaxZ()
+    
+      
 
     # question: how do i figure out which is the outward facing normal
     # and which is the inside facing normal? Do I need to rely on the normals
