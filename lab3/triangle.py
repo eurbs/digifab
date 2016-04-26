@@ -130,8 +130,8 @@ class Triangle(object):
       #print "start: " + str(start) + "end: " + str(end)
       lineSeggies.append(Segment(start, end))
 
-      countingX1 += inverseSlope1
-      countingX2 += inverseSlope2
+      countingX1 -= (inverseSlope1*thickness)
+      countingX2 -= (inverseSlope2*thickness)
       #This might be broken here... good place to come back to
       #Do i need to multiply the slope by thickness? does each step step enough
       scanLineY -= thickness  # emilee: i told you so
@@ -150,8 +150,8 @@ class Triangle(object):
       end = Point3D(countingX2, scanLineY, z)
       lineSeggies.append(Segment(start, end))
 
-      countingX1 -= inverseSlope1
-      countingX2 -= inverseSlope2
+      countingX1 += (inverseSlope1*thickness)
+      countingX2 += (inverseSlope2*thickness)
       #This might be broken here... good place to come back to
       #Do i need to multiply the slope by thickness? does each step step enough
       scanLineY += thickness
