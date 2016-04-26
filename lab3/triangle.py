@@ -1,6 +1,7 @@
 from point3d import *
 from segment import *
 from plane import *
+import math
 
 """
 Emilee Urbanek and Nick Confrey
@@ -205,8 +206,17 @@ class Triangle(object):
     #print "Points 3 and 0:"
     pointsOnPlane.extend(self._segmentPlaneIntersection(self.points[2], self.points[0], plane))
     deleteDupes = set(pointsOnPlane)
-    #for point in pointsOnPlane:
-    #  print point
+
+    #Sanity check to avoid nan points
+    bad = []
+    for p in deleteDupes:
+      for coord in p.a:
+        if math.isnan(coord):
+          bad.append(p)
+          break
+    for ugly in bad:
+      deleteDupes.remove(ugly)
+
     if(len(deleteDupes) > 2):
       print self
       print "Uh oh! We have " + str(len(deleteDupes)) + " points to make lines out of"

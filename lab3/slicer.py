@@ -36,7 +36,10 @@ def makePerimeter(segmentsPerLayer):
 
   #This is the slow solution
 
-  #deep copy
+  if(not segmentsPerLayer):
+    return None
+  
+  #deep copy so we don't mess with the original list
   segments = list(segmentsPerLayer[1:])
   final = [[segmentsPerLayer[0].start, segmentsPerLayer[0].end]]
   search = segmentsPerLayer[0].end
@@ -79,6 +82,7 @@ def makePerimeter(segmentsPerLayer):
       break
 
   # append first point of each perimeter to end of list
+  # for each perimeter, make sure that the start and end point are the same
   for i in xrange(len(final)):
     final[i].append(final[i][0])
 
@@ -146,6 +150,10 @@ def main():
     #Step 6: Arrange the line segments so they are contiguous, that one ends where the other begins
     # note: RUNNING INTO PROBLEMS WITH THE SPHERE
     perimeters = makePerimeter(segmentsPerLayer)
+    if(perimeters == None):
+      layer += layerHeight
+      cuttingPlane.up(layer)
+      continue # there's a magical floating object!
     for i,perm in enumerate(perimeters): # DEBUG (for loop)
       print "Perimeter #" + str(i)
       for per in perm:
