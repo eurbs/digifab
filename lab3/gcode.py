@@ -1,6 +1,6 @@
 import math
 from point3d import Point3D
-from slicer import Parameters # this will probs be circular, put Parametes in parse.py
+from parse import Parameters # this will probs be circular, put Parametes in parse.py
 """
 Emilee Urbanek and Nick Confrey
 CMSC 22010: Digital Fabrication
@@ -98,15 +98,51 @@ def generateGCode(gfile, params, layerZ, perimeters):
     for j in xrange(len(perim)-1):
       point_start = perim[j]
       point_end = perim[j+1]
-      # TODO: extrude isn't always working, fix this.
       extrude_amount = calculateExtrudeAmount(
         point_start.x, point_start.y, point_end.x, point_end.y, params.thickness)
       updateExtruded(extrude_amount)
-      lines.append("G1 X{:3.3f} Y{:3.3f} E{:3.3f}".format(
-        point_end.x, point_end.y, extruded)) # move with extrude
+      # move with extrude
+      lines.append("G1 X{:3.3f} Y{:3.3f} E{:3.3f}".format(point_end.x, point_end.y, extruded)) 
 
   lines.append("")
   gfile.write("\n".join(lines))
+  return
+
+def generateGCodeParallel(gfile, params, layerZ, parallelTriangleSegments):
+  """Generates the GCode for triangles that were found that are parallel to
+     the cutting plane. This is only ever called AFTER generateGCode as it
+     handles an edge case
+
+  Keyword arguments:
+  gfile -- A file already open for writing the gcode to
+  params -- a Parameters class filled with the parameters specified by user
+  layerZ -- The Z height of the current layer (relative to origin)
+  parallelTriangleSegments -- A list of lists of line segments represeting the rasterized 
+                              area of a triangle parallel to the cutting plane
+  """
+  if not parallelTriangleSegments:
+    return
+
+  lines = []
+  for segments in parallelTriangleSegments:
+    lines.append("; Parallel rasterized triangle on layer {}".format(layerZ))
+    for seggy in segments:
+      # note: not yet optimized, this raster scans, but doesn't alternate
+      # note: also doesn't print a perimeter around this, but that's handled elsewhere
+      # TODO: make sure the start and end points are +thickness and -thickness respectively to fit
+      #       within the perimeters
+
+      # move to start point
+      lines.append("G1 X{:3.3f} Y{:3.3f}".format(seggy.start.x, seggy.start.y)) 
+      # update extrude amount according to the move we're about to make
+      extrude_amount = calculateExtrudeAmount(
+        seggy.start.x, seggy.start.y, seggy.end.x, seggy.end.y, params.thickness)
+      updateExtruded(extrude_amount)
+      # extrude to end point
+      lines.append("G1 X{:3.3f} Y{:3.3f} E{:3.3f}".format(seggy.end.x, seggy.end.y, extruded))
+  lines.append("")
+  gfile.write("\n".join(lines))
+  return
 
 def generateCleanup(gfile):
   lines = [
@@ -151,6 +187,8 @@ def test():
   with open("test_gcode.gcode", "w") as gfile:
     generateSetup(gfile, params)
     generateGCode(gfile, params, 0.0, perimeters)
+    generateGCode(gfile, params, 0.19, perimeters)
+    generateGCode(gfile, params, 0.38, perimeters)
     generateCleanup(gfile)
 
   print "success"

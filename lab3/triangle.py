@@ -163,6 +163,23 @@ class Triangle(object):
     All line segments start from negative x and end from a more positive x
     Raster up y
     """
+    # Note: We want polygon contour filling rather than triangle filling
+    # Here's a paper on it: http://www2.tku.edu.tw/~tkjse/2-4/2-4-1.pdf
+    # Since it's a manafold object, we can assume that if we have a triangle
+    # parallel to the cutting plane, then there are also triangles that hold
+    # that triangle up (the hill leading up to the plateau). In that case,
+    # we've overthought this special case, and rasterization has to hapen
+    # when generating the gcode. The first reason we need this parallelIntersection
+    # function then is to inform the gcode generator that we need to fill in
+    # a platform.
+    # The second reason is that we need to determine which portions of the
+    # perimeter at this level need to be filled in. Given a perimeter, we can
+    # match the line segments within the triangle to line segments along the
+    # perimeter. When we get a closed surface containing all the parallel
+    # triangles, we mark that perimeter as being an area rather than just a perimeter
+    #
+    # Finally, we're going to have two layers for each flat surface.
+
     #Sort by assending y coordinates so v1 is the top
     self.points.sort(key=lambda p: p.y, reverse=True)
 

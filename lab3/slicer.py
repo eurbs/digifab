@@ -1,5 +1,6 @@
 from parse import *
 from triangle import *
+import gcode
 import sys
 """
 Emilee Urbanek and Nick Confrey
@@ -12,19 +13,6 @@ Due: 4/25
 The Main File -- slicer.py
 This file holds all of the main logic to make the slicer run.
 """
-
-class Parameters(object):
-  """Class used to pass parameters to gcode parsing functions"""
-  def __init__(self, filename, perimeterLayers, infill, layerHeight, thickness, support):
-    # TODO: should handle defaults here instead of in parse.py
-    self.stlfilename = filename
-    self.gcodefilename = filename.split(".")[0] + ".gcode"
-    self.perimeterLayers = perimeterLayers
-    self.infill = infill
-    self.layerHeight = layerHeight
-    self.thickness = thickness
-    self.support = support
-    self.temperature = 210
 
 def makePerimeter(segmentsPerLayer):
   #What do perimeters look like for parallel layers??
@@ -100,6 +88,7 @@ def main():
   #Step 0: Parse user input to get constants
   filename, perimeterLayers, infill, layerHeight, thickness, support = parseInput()
   params = Parameters(filename, perimeterLayers, infill, layerHeight, thickness, support)
+  gfile = open(params.gcodefilename, "w") # note: this is NOT good. should open and close each time I want to write to it. to do this, we open in "a" or append mode rather than "w" or write mode
   
   #Step 1: Parse the STL into a list of triangles
   # TODO: force z's into multiples of the layerHeight
@@ -123,23 +112,27 @@ def main():
   # p3 = Point3D(0,0,0)
   # trianglesConsidered.append(Triangle([p1,p2,p3],Point3D([0,0,1])))
 
+  gcode.generateSetup(gfile, params)
   while(layer <= top):
     #Step 4: Determine subset of triangles within cutting plane, throw rest away
     trianglesConsidered = filter(lambda x: (x.z_min <= layer) and (x.z_max >= layer), triangles)
 
     #Step 5: Run plane intersection test on each triangle, return a line segment
     segmentsPerLayer = []
+    parallelTrianglesInLayer = [] # list of lists of segments
     for triangle in trianglesConsidered:
       #testing for the parallel case
       if(cuttingPlane.normal.z == abs(triangle.normal.z) and triangle.normal.x == 0 and triangle.normal.y == 0):
         # THIS IS WHERE YOU WOULD DO SOMETHING WITH THE RASTER LAYER
-        triangle._parallelIntersection(thickness, triangle.normal.z)
+        parallelTrianglesInLayer.append(
+          triangle._parallelIntersection(thickness, triangle.normal.z))
       else:
         segmentsPerLayer.extend(triangle.intersectPlane(cuttingPlane, thickness))
     # What if the triangle is paralell to the plane??
       #Run special function to create line segments based on filament width
     # What if the triangle intersects at only one point??
       #line segment with start and end are the same
+      #note: nick says he got rid of the handling of single points. emilee gave the example of the tip of a triangle. If we want this to be complete, we should fix this. (falls into group 3 of the triangle intersection examples)
     # What if a triangle lies between two cutting planes?
       # check for intersections on the (previous, current] cutting planes interval
     # Store line segment x,y in a data structure (list?)
@@ -151,11 +144,21 @@ def main():
     #sort into different perimeters
 
     #Step 6: Arrange the line segments so they are contiguous, that one ends where the other begins
-    perimeter = makePerimeter(segmentsPerLayer)
-    for i,perm in enumerate(perimeter):
+    # note: RUNNING INTO PROBLEMS WITH THE SPHERE
+    perimeters = makePerimeter(segmentsPerLayer)
+    for i,perm in enumerate(perimeters): # DEBUG (for loop)
       print "Perimeter #" + str(i)
       for per in perm:
         print "\t " + str(per)
+
+    print "generating gcode for layer {!s} perimeters".format(layer) # DEBUG
+    gcode.generateGCode(gfile, params, layer, perimeters)
+
+    print "generating gcode for case2 (parallel to cutting plane) triangles" # DEBUG
+    gcode.generateGCodeParallel(gfile, params, layer, parallelTrianglesInLayer)
+
+
+
     #Step 7: Loop over all line segments in data structure, output print head moves in gcode
     # What about when there are multiple perameters per layer??
     # How to optimize non-printing head moves??
@@ -165,7 +168,9 @@ def main():
     layer += layerHeight
     cuttingPlane.up(layer)
   
-  
+  # Cleanup 
+  gcode.generateCleanup(gfile) 
+  gfile.close()
 
   #others:
   # infill

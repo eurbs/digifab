@@ -10,6 +10,20 @@ Due: 4/25
 
 Parsing functions
 """
+class Parameters(object):
+  """Class used to pass parameters to gcode parsing functions"""
+  def __init__(self, filename, perimeterLayers, infill, layerHeight, thickness, support):
+    # TODO: should handle defaults here instead of in parse.py
+    self.stlfilename = filename
+    self.gcodefilename = filename.split(".")[0] + ".gcode"
+    self.perimeterLayers = perimeterLayers
+    self.infill = infill
+    self.layerHeight = layerHeight
+    self.thickness = thickness
+    self.support = support
+    self.temperature = 210
+
+
 def parseInput():
   parser = argparse.ArgumentParser()
   parser.add_argument("path", help="path to the stl file (just the filename if in cwd)")

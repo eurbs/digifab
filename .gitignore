@@ -1,3 +1,5 @@
 *.pyc
 *~
 *.DS_Store
+lab3/samples/*.gcode
+lab3/test_gcode.gcode
