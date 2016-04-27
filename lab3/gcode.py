@@ -83,8 +83,11 @@ def generateGCode(gfile, params, layerZ, perimeters):
   gfile -- A file already open for writing the gcode to
   params -- a Parameters class filled with the parameters specified by user
   layerZ -- The Z height of the current layer (relative to origin)
-  perimeters -- A list of lists of points represeting perimeters passed in by slicer.py 
+  perimeters -- A list of lists of segments represeting perimeters passed in by slicer.py 
   """
+  if not perimeters:
+    print "No perimeters passed at layer Z={}. GCode not generated.".format(layerZ)
+    return
 
   gfile.write("; LAYER Z={:3.6f}\n".format(layerZ))
   gfile.write("G1 Z{:3.6f} ; raise print head\n".format(layerZ))
@@ -105,11 +108,11 @@ def generateGCode(gfile, params, layerZ, perimeters):
 
       # Generate code
     lines.append("; PERIMETER {}".format(i))
-    first_point =  perim[0]
+    first_point =  perim[0].start
     lines.append("G1 X{:3.6f} Y{:3.6f}".format(first_point.x, first_point.y)) # move no extrude
-    for j in xrange(len(perim)-1):
-      point_start = perim[j]
-      point_end = perim[j+1]
+    for seggy in perim:
+      point_start = seggy.start
+      point_end = seggy.end
       extrude_amount = calculateExtrudeAmount(
         point_start.x, point_start.y, point_end.x, point_end.y, params.thickness)
       updateExtruded(extrude_amount)

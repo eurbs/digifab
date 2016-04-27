@@ -15,6 +15,16 @@ The Main File -- slicer.py
 This file holds all of the main logic to make the slicer run.
 """
 
+def perimToSeggies(perimeter):
+  """THIS FUCKTION SHOULD BE DELETED"""
+  seggies = []
+  print len(perimeter)
+  for i in xrange(len(perimeter)-1):
+    print perimeter[i]
+    print perimeter[i+1]
+    seggies.append(Segment(perimeter[i], perimeter[i+1]))
+  print len(seggies)
+  return seggies
 
 def makePerimeter(segmentsPerLayer):
   #What do perimeters look like for parallel layers??
@@ -89,7 +99,10 @@ def makePerimeter(segmentsPerLayer):
   for i in xrange(len(final)):
     final[i].append(final[i][0])
 
-  return final
+  print "printing final"
+  newFinal = map(perimToSeggies, final)
+  # return final
+  return newFinal
 
 def main():
   #Step 0: Parse user input to get constants
@@ -130,26 +143,18 @@ def main():
     #Step 4: Determine subset of triangles within cutting plane, throw rest away
     trianglesConsidered = filter(
       lambda x: floatLE(x.z_min, layer) and floatGE(x.z_max, layer), triangles)
-    if isclose(layer, 3.04): # DEBUG
-      print "======================== DEBUG STARTING HERE ============================="
-      print "printing considered triangles for layer {}".format(layer)
 
     #Step 5: Run plane intersection test on each triangle, return a line segment
     segmentsPerLayer = []
     parallelTrianglesInLayer = [] # list of lists of segments
     for triangle in trianglesConsidered:
-      print "CURRENTLY PROCESSING TRIANGLE"
-      print triangle
       #testing for the parallel case
       if(cuttingPlane.normal.z == abs(triangle.normal.z) and triangle.normal.x == 0 and triangle.normal.y == 0):
         # THIS IS WHERE YOU WOULD DO SOMETHING WITH THE RASTER LAYER
         parallelTrianglesInLayer.append(
           triangle._parallelIntersection(thickness, triangle.normal.z))
       else:
-        print "IN REGULAR CASE"
-        print "length of segmentsPerLayer before {}".format(len(segmentsPerLayer))
         segmentsPerLayer.extend(triangle.intersectPlane(cuttingPlane, thickness))
-        print "length of segmentsPerLayer after {}".format(len(segmentsPerLayer))
     # What if the triangle is paralell to the plane??
       #Run special function to create line segments based on filament width
     # What if the triangle intersects at only one point??
@@ -177,9 +182,9 @@ def main():
         for per in perm:
           print "\t " + str(per)
 
-    if perimeters:
-      print "generating gcode for layer {!s} perimeters".format(layer) # DEBUG
-      gcode.generateGCode(gfile, params, layer, perimeters)
+
+    print "generating gcode for layer {!s} perimeters".format(layer) # DEBUG
+    gcode.generateGCode(gfile, params, layer, perimeters)
 
     print "generating gcode for case2 (parallel to cutting plane) triangles" # DEBUG
     gcode.generateGCodeParallel(gfile, params, layer, parallelTrianglesInLayer)
