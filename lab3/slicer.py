@@ -41,17 +41,15 @@ def makePerimeter(segmentsPerLayer):
   if(not segmentsPerLayer):
     print "FUUUUCK"
     return None
-  
+
   #deep copy so we don't mess with the original list
   segments = list(segmentsPerLayer[1:])
-  final = [[segmentsPerLayer[0].start, segmentsPerLayer[0].end]]
+  final = [[segmentsPerLayer[0]]]
   search = segmentsPerLayer[0].end
   circuitBreaker = 0
   #stores number of perimeters per layer we've found so far
   perimeterNumber = 0
   while segments:
-    if(len(segments) == 1):
-      break
     #print "Looking for " + str(search)
     found = False
     for seg in segments:
@@ -59,7 +57,7 @@ def makePerimeter(segmentsPerLayer):
       if(seg.start.close(search)):
         #print "Found it! On line " + str(seg)
         #print "Adding " + str(seg.end)
-        final[perimeterNumber].append(seg.end)
+        final[perimeterNumber].append(seg)
         segments.remove(seg)
         search = seg.end
         found = True
@@ -67,14 +65,14 @@ def makePerimeter(segmentsPerLayer):
       if(seg.end.close(search)):
         #print "Found it! On line " + str(seg)
         #print "Adding " + str(seg.start)
-        final[perimeterNumber].append(seg.start)
+        final[perimeterNumber].append(Segment(seg.end, seg.start))
         segments.remove(seg)
         search = seg.start
         found = True
         break
     if(not found):
       perimeterNumber += 1
-      final.append([segments[0].start, segments[0].end])
+      final.append(segments[0])
       search = segments[0].end
       segments.pop(0)
 
@@ -86,10 +84,23 @@ def makePerimeter(segmentsPerLayer):
 
   # append first point of each perimeter to end of list
   # for each perimeter, make sure that the start and end point are the same
-  for i in xrange(len(final)):
-    final[i].append(final[i][0])
+  #for i in xrange(len(final)):
+  #  final[i].append(final[i][0])
 
   return final
+
+def pointsToSegments(perimeter):
+  segments = []
+  for i, point in enumerate(perimeter[:-1]):
+    segments.append(Segment(point, perimeter[i+1]))
+  return segments
+
+#return type: list of lists of points by either x or y coordinate
+#from min to max y
+def makeInfill(perimeter):
+  #assuming that a perimeter is a list of point3D
+  segmentPerimeter = pointsToSegments(perimeter)
+  print perimeter
 
 def main():
   #Step 0: Parse user input to get constants
@@ -171,13 +182,16 @@ def main():
     #   layer += layerHeight
     #   cuttingPlane.up(layer)
     #   continue # there's a magical floating object!
+    print "AFTER SORTING!!!!!!!!!!!!!!!!!!"
     if perimeters:
       for i,perm in enumerate(perimeters): # DEBUG (for loop)
         print "Perimeter #" + str(i)
         for per in perm:
           print "\t " + str(per)
 
-    if perimeters:
+    #makeInfill(perimeters)
+
+    if perimeters: #else, there is a magical floating object!
       print "generating gcode for layer {!s} perimeters".format(layer) # DEBUG
       gcode.generateGCode(gfile, params, layer, perimeters)
 
