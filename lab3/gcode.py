@@ -1,6 +1,7 @@
 import math
 from point3d import Point3D
 from parse import Parameters # this will probs be circular, put Parametes in parse.py
+import sys
 """
 Emilee Urbanek and Nick Confrey
 CMSC 22010: Digital Fabrication
@@ -31,8 +32,6 @@ def calculateExtrudeAmount(x1, y1, x2, y2, thickness):
   dist = math.sqrt(math.pow(x2-x1, 2) + math.pow(y2-y1, 2))
   amt = thickness * dist
   return amt
-
-
 
 # ==============================================================================
 # ========================= GCODE GENERATION FUNCTIONS =========================
@@ -92,6 +91,19 @@ def generateGCode(gfile, params, layerZ, perimeters):
   lines = []
   # TODO: handle parallel "perimeters" (actually areas)
   for i, perim in enumerate(perimeters):
+    # for wall in xrange(params.perimeterLayers):
+      # TODO MAKE SMALLER AND SMALLER FOR PERIMETERS AND WALLS
+      # IDEALLY, WE WANT TO GO INNER TO OUTER, BUT WE'RE GOING OUTER TO INNER
+      # Calculate new width
+      # note: calculating new width is naive, we assume there's enough space.
+      # todo: make it not naive
+      # note: this isn't actually going to work. need a way to know if we're
+      #       on the left/right, up/down quadrant of a perimeter...
+      # it gets complicated if and when a segment crosses over the quadrant..
+      # that being said, we're calculating a distance that changes based on the slopes..
+      # width = float(wall) * params.thickness
+
+      # Generate code
     lines.append("; PERIMETER {}".format(i))
     first_point =  perim[0]
     lines.append("G1 X{:3.6f} Y{:3.6f}".format(first_point.x, first_point.y)) # move no extrude
