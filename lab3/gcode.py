@@ -87,14 +87,14 @@ def generateGCode(gfile, params, layerZ, perimeters):
   perimeters -- A list of lists of points represeting perimeters passed in by slicer.py 
   """
 
-  gfile.write("; LAYER Z={:3.3f}\n".format(layerZ))
-  gfile.write("G1 Z{:3.3f} ; raise print head\n".format(layerZ))
+  gfile.write("; LAYER Z={:3.6f}\n".format(layerZ))
+  gfile.write("G1 Z{:3.6f} ; raise print head\n".format(layerZ))
   lines = []
   # TODO: handle parallel "perimeters" (actually areas)
   for i, perim in enumerate(perimeters):
     lines.append("; PERIMETER {}".format(i))
     first_point =  perim[0]
-    lines.append("G1 X{:3.3f} Y{:3.3f}".format(first_point.x, first_point.y)) # move no extrude
+    lines.append("G1 X{:3.6f} Y{:3.6f}".format(first_point.x, first_point.y)) # move no extrude
     for j in xrange(len(perim)-1):
       point_start = perim[j]
       point_end = perim[j+1]
@@ -102,7 +102,7 @@ def generateGCode(gfile, params, layerZ, perimeters):
         point_start.x, point_start.y, point_end.x, point_end.y, params.thickness)
       updateExtruded(extrude_amount)
       # move with extrude
-      lines.append("G1 X{:3.3f} Y{:3.3f} E{:3.3f}".format(point_end.x, point_end.y, extruded)) 
+      lines.append("G1 X{:3.6f} Y{:3.6f} E{:3.6f}".format(point_end.x, point_end.y, extruded)) 
 
   lines.append("")
   gfile.write("\n".join(lines))
@@ -133,13 +133,13 @@ def generateGCodeParallel(gfile, params, layerZ, parallelTriangleSegments):
       #       within the perimeters
 
       # move to start point
-      lines.append("G1 X{:3.3f} Y{:3.3f}".format(seggy.start.x, seggy.start.y)) 
+      lines.append("G1 X{:3.6f} Y{:3.6f}".format(seggy.start.x, seggy.start.y)) 
       # update extrude amount according to the move we're about to make
       extrude_amount = calculateExtrudeAmount(
         seggy.start.x, seggy.start.y, seggy.end.x, seggy.end.y, params.thickness)
       updateExtruded(extrude_amount)
       # extrude to end point
-      lines.append("G1 X{:3.3f} Y{:3.3f} E{:3.3f}".format(seggy.end.x, seggy.end.y, extruded))
+      lines.append("G1 X{:3.6f} Y{:3.6f} E{:3.6f}".format(seggy.end.x, seggy.end.y, extruded))
   lines.append("")
   gfile.write("\n".join(lines))
   return
