@@ -102,8 +102,6 @@ class Triangle(object):
         self.z_min = self._getMinZ()
         self.z_max = self._getMaxZ()
     
-      
-
     # question: how do i figure out which is the outward facing normal
     # and which is the inside facing normal? Do I need to rely on the normals
     # provided to me? Do I just have to calculate both? how does this work?
@@ -281,7 +279,7 @@ class Triangle(object):
           bad.append(p)
           break
       for compare in deleteDupes:
-        if compare == p:
+        if compare == p or compare in bad:
           continue
         if(isclose(p.x, compare.x, episilon) and
         isclose(p.y, compare.y, episilon) and
