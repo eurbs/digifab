@@ -167,17 +167,19 @@ def main():
     #Step 6: Arrange the line segments so they are contiguous, that one ends where the other begins
     # note: RUNNING INTO PROBLEMS WITH THE SPHERE
     perimeters = makePerimeter(segmentsPerLayer)
-    if(perimeters == None):
-      layer += layerHeight
-      cuttingPlane.up(layer)
-      continue # there's a magical floating object!
-    for i,perm in enumerate(perimeters): # DEBUG (for loop)
-      print "Perimeter #" + str(i)
-      for per in perm:
-        print "\t " + str(per)
+    # if(perimeters == None):
+    #   layer += layerHeight
+    #   cuttingPlane.up(layer)
+    #   continue # there's a magical floating object!
+    if perimeters:
+      for i,perm in enumerate(perimeters): # DEBUG (for loop)
+        print "Perimeter #" + str(i)
+        for per in perm:
+          print "\t " + str(per)
 
-    print "generating gcode for layer {!s} perimeters".format(layer) # DEBUG
-    gcode.generateGCode(gfile, params, layer, perimeters)
+    if perimeters:
+      print "generating gcode for layer {!s} perimeters".format(layer) # DEBUG
+      gcode.generateGCode(gfile, params, layer, perimeters)
 
     print "generating gcode for case2 (parallel to cutting plane) triangles" # DEBUG
     gcode.generateGCodeParallel(gfile, params, layer, parallelTrianglesInLayer)

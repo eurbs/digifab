@@ -69,6 +69,8 @@ class Triangle(object):
     cutting planes.
 
     Assumes 0.001 <= layerHeight < 1mm
+
+    Note: this isn't perfect and doesn't recalculate normals
     """
     # note: these new z's aren't rounded/truncated to 3 decimal places -- may cause problems
     # TODO: fix truncation
@@ -86,21 +88,38 @@ class Triangle(object):
         # Recalculate the min and max z's
         self.z_min = self._getMinZ()
         self.z_max = self._getMaxZ()
-    elif segment:
-      # NICK: this is where a full size is parallel with normal, if you comment this out, things
-      # kind of work, however, you don't get a perimeter at the final layer
-      idx1 = segment[0]
-      idx2 = segment[1]
-      toMod = int(self.points[idx1].z * 1000)
-      if (toMod % mod) != 0:
-        # Not on cutting plane, move this segment to the next closest one above
-        new_z = math.ceil(toMod / float(mod)) * float(mod) / 1000
-        # Update the points in the triangle
-        self.points[idx1] = Point3D(self.points[idx1].x, self.points[idx1].y, new_z)
-        self.points[idx2] = Point3D(self.points[idx2].x, self.points[idx2].y, new_z)
-        # Recalculate the min and max z's
-        self.z_min = self._getMinZ()
-        self.z_max = self._getMaxZ()
+    # elif segment:
+    #   # NICK: this is where a full size is parallel with normal, if you comment this out, things
+    #   # kind of work, however, you don't get a perimeter at the final layer
+    #   idx1 = segment[0]
+    #   idx2 = segment[1]
+    #   toMod = int(self.points[idx1].z * 1000)
+    #   if (toMod % mod) != 0:
+    #     # Not on cutting plane, move this segment to the next closest one above
+    #     new_z = math.ceil(toMod / float(mod)) * float(mod) / 1000
+    #     # Update the points in the triangle
+    #     self.points[idx1] = Point3D(self.points[idx1].x, self.points[idx1].y, new_z)
+    #     self.points[idx2] = Point3D(self.points[idx2].x, self.points[idx2].y, new_z)
+    #     # Recalculate the min and max z's
+    #     self.z_min = self._getMinZ()
+    #     self.z_max = self._getMaxZ()
+
+    # Below the code warps all of the Z's to be on the cutting plane
+    # mod = int(layerHeight * 1000)
+    # new_points = []
+    # for point in self.points:
+    #   toMod = int(point.z * 1000)
+    #   if (toMod % mod) != 0:
+    #     # We have a z not on a cutting plane, move to the next closest one
+    #     # new_z = math.ceil(toMod / float(mod)) * float(mod) / 1000.0 # Find next closest multiple
+    #     new_z = round(toMod / float(mod)) * float(mod) / 1000.0 # Find next closest multiple # EXPERIMENTAL (TODO)
+    #     new_points.append(Point3D(point.x, point.y, new_z))
+    #   else:
+    #     new_points.append(point)
+    # self.points = new_points
+    # self.z_min = self._getMinZ()  # reset zmin and zmax
+    # self.z_max = self._getMaxZ()
+
     
     # question: how do i figure out which is the outward facing normal
     # and which is the inside facing normal? Do I need to rely on the normals
