@@ -61,12 +61,7 @@ def makeInfill(perimeters, infill, direction):
   increment = layerThickness + infill*(layerThickness - (maxY - minY))
   increment = 1
   print "increment is: " + str(increment)
-  #Optimize: is there a pretty way to get both of these in one pass?
-  # maxY = max(perm, key=lambda seg: max(seg.start.y, seg.end.y))
-  # minY = min(perm, key=lambda seg: min(seg.start.y, seg.end.y))
-  # maxX = max(perm, key=lambda seg: max(seg.start.x, seg.end.x))
-  # minX = min(perm, key=lambda seg: min(seg.start.x, seg.end.x))
-
+  
   scan = minY + increment
   print "starting at y = " + str(minY)
   #segmentsConsidered = []
@@ -98,7 +93,7 @@ def resizePerimeters(params, perimeters, brim=False, raft=False):
   if raft:
     raise Exception("raft not yet supported") # TODO
 
-  thickness = params.thickness
+  thickness = params.thickness / 2.0
   new_perimeters = []
   for perimeter in perimeters:
     new_seggies = []
@@ -114,10 +109,10 @@ def resizePerimeters(params, perimeters, brim=False, raft=False):
         print seggy1.end
         print seggy2.start
         # raise Exception("Found neighboring segments in perimeter which don't share a point")
-        print "Found neighboring segments in perimeter which don't share a point"
-        print "Considering float imperfections and imperfections in perimeter handling, ignoring"
-        print "Will just consider the end point of the first point."
-        print "If the points printed above are REALLY different, there's a bigger problem"
+        # Considering the float imperfections and the imperfections in perimeter handling
+        # we ignore this error. We'll consider the end point of the first segment. If the
+        # points printed are really different though, that indicates a bigger problem.
+        print "Found neighboring segments in perimeter which don't share a point, ignoring"
       point2d = [seggy1.end.x, seggy1.end.y]  # is the same as seggy2.y
       # Find unit vector of distance thickness from the origin in direction of perpendicular
       trans_end1 = map(lambda x: x * thickness, seggy1.perpIn)
