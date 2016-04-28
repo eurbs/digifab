@@ -41,7 +41,7 @@ class Point3D(object):
     return not self.__eq__(other)
 
   def close(self, other):
-    #assumes other is also a point
+    # assumes other is also a point
     x = isclose(float(self.x), float(other.x), episilon)
     y = isclose(float(self.y), float(other.y), episilon)
     z = isclose(float(self.z), float(other.z), episilon)

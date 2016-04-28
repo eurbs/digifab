@@ -29,20 +29,17 @@ def updateExtruded(increment):
 
 def calculateExtrudeAmount(x1, y1, x2, y2, thickness):
   """Calculates the extrude amount moving from (x1, y1) to (x2, y2)"""
-  # TODO: this is messed up somehow
   dist = math.sqrt(math.pow(x2-x1, 2) + math.pow(y2-y1, 2))
   amt = thickness * dist / 1.75 # note: hard coded, todo: make thickness just be params
   return amt
 
-#return type: list of lists of points by either x or y coordinate
-#from min to max y
 def makeInfill(perimeters, infill, direction):
+  """Returns a list of lists of points by either x or y coordinate from min to max"""
+  # TODO: Support direction
   if(not perimeters):
     return None
   final = []
   allSegments = []
-  print "in make infill"
-  print "len perimeters: {}".format(len(perimeters))
   maxY = perimeters[0][0].start.y
   minY = perimeters[0][0].start.y 
   maxX = perimeters[0][0].start.x
@@ -54,28 +51,21 @@ def makeInfill(perimeters, infill, direction):
       maxX = max(maxX, max(segment.start.x, segment.end.x))
       minX = min(minX, min(segment.start.x, segment.end.x))
       allSegments.append(segment)
-  print "len allsegments: {}".format(len(allSegments))
 
   #linear interpolation between 0-100% infill
   layerThickness = .4
   increment = layerThickness + infill*(layerThickness - (maxY - minY))
   increment = 1
-  print "increment is: " + str(increment)
-  
+
   scan = minY + increment
-  print "starting at y = " + str(minY)
-  #segmentsConsidered = []
+
   while(scan <= maxY):
     scanLine = Segment(Point3D(minX, scan, 0), Point3D(maxX, scan, 0), None) # note: probably dangerous to have none
-    #segmentsConsidered = filter(lambda x: floatLE(x.start.y, scanLine) and floatGE(x.z_max, scanLine), perm)
     lineHits = []
     for seggy in allSegments:
       intersect = scanLine.intersect2D(seggy)
-      if(intersect):
+      if intersect:
         lineHits.append(intersect)
-    if(not lineHits):
-      print "Y value failure: " + str(scan)
-      #raise Exception("Uhoh! The infill finder did not find a inside part.")
     final.append(list(deleteDuplicates(lineHits)))
     scan += increment
 
@@ -105,14 +95,13 @@ def resizePerimeters(params, perimeters, brim=False, raft=False):
       seggy2 = perimeter[(i+1)%len(perimeter)]
       new_seggy1 = new_seggies[i]
       new_seggy2 = new_seggies[(i+1)%len(new_seggies)] # len perimeter and new_seggies should be same
-      if seggy1.end != seggy2.start: # note: is this how to properly invoke __eq__()?
-        print seggy1.end
-        print seggy2.start
+      # if seggy1.end != seggy2.start:
         # raise Exception("Found neighboring segments in perimeter which don't share a point")
+        # print seggy1.end
+        # print seggy2.start
         # Considering the float imperfections and the imperfections in perimeter handling
         # we ignore this error. We'll consider the end point of the first segment. If the
         # points printed are really different though, that indicates a bigger problem.
-        print "Found neighboring segments in perimeter which don't share a point, ignoring"
       point2d = [seggy1.end.x, seggy1.end.y]  # is the same as seggy2.y
       # Find unit vector of distance thickness from the origin in direction of perpendicular
       trans_end1 = map(lambda x: x * thickness, seggy1.perpIn)
@@ -196,11 +185,6 @@ def generateGCodeInfill(gfile, params, layerZ, perimeters):
   lines = []
   lines.append("; INFILL")
   infill = makeInfill(perimeters, params.infill, direction)
-  if infill:
-      for i,fill in enumerate(infill):
-        print "Layer #" + str(i)
-        for point in fill:
-          print "\t" + str(point)
   for points in infill:
     if not points:
       continue
@@ -228,27 +212,19 @@ def generateGCode(gfile, params, layerZ, perimeters):
   perimeters -- A list of lists of segments represeting perimeters passed in by slicer.py 
   """
   if not perimeters:
-    print "No perimeters passed at layer Z={}. GCode not generated.".format(layerZ)
+    print "warn: No perimeters passed at layer Z={}. GCode not generated.".format(layerZ)
     return
 
   gfile.write("; LAYER Z={:3.6f}\n".format(layerZ))
   gfile.write("G1 Z{:3.6f} ; raise print head\n".format(layerZ))
-  # TODO: handle parallel "perimeters" (actually areas)
 
   # --- Generate List of concentric perimeters ---
-  # Note: uncomment when resizePerimeters works
   concentricPerimeters = []
   concentricPerimeters.append(perimeters)
   for i in xrange(params.perimeterLayers):
     # This includes appending an extra perimeter to be passed to the infill generator
     concentricPerimeters.append(resizePerimeters(params, concentricPerimeters[i]))
 
-  # --- Generate GCode for the perimeters ---
-  # OLD CODE, note: DELETE when resizePerimeters works
-  # for perim in perimeters:
-  #   generateGCodePerim(gfile, params, perim)
-
-  # Note: uncomment when resizePerimeters works
   # We're iterating down the columns of concentric perimeters
   for j in xrange(len(concentricPerimeters[0])):
     # We're not going to do the infill perimeter until after all perimeters are done
@@ -258,9 +234,7 @@ def generateGCode(gfile, params, layerZ, perimeters):
 
   # --- Generate the code for the infill ---
   infill_perimeters = concentricPerimeters.pop() # Pops off last element
-  # infill_perimeters = perimeters # DEBUG temporary for nick
   generateGCodeInfill(gfile, params, layerZ, infill_perimeters)
-
   return
 
 def generateGCodeParallel(gfile, params, layerZ, parallelTriangleSegments):
@@ -275,6 +249,8 @@ def generateGCodeParallel(gfile, params, layerZ, parallelTriangleSegments):
   parallelTriangleSegments -- A list of lists of line segments represeting the rasterized 
                               area of a triangle parallel to the cutting plane
   """
+  # TODO: handle parallel these areas as arbitrarily filled polygons rather than
+  #       as raster filled triangles.
   if not parallelTriangleSegments:
     return
 
@@ -282,11 +258,6 @@ def generateGCodeParallel(gfile, params, layerZ, parallelTriangleSegments):
   for segments in parallelTriangleSegments:
     lines.append("; Parallel rasterized triangle on layer {}".format(layerZ))
     for seggy in segments:
-      # note: not yet optimized, this raster scans, but doesn't alternate
-      # note: also doesn't print a perimeter around this, but that's handled elsewhere
-      # TODO: make sure the start and end points are +thickness and -thickness respectively to fit
-      #       within the perimeters
-
       # move to start point
       lines.append("G1 X{:3.6f} Y{:3.6f}".format(seggy.start.x, seggy.start.y)) 
       # update extrude amount according to the move we're about to make
@@ -333,7 +304,7 @@ def test():
   print "=============== testing perimeter resizing ==============="
   map(printFunc, resizePerimeters(params, perimeters)[0])
 
-  # print "=============== TEsting gcode Generation ==============="
+  print "=============== TEsting gcode Generation ==============="
   with open("test_gcode.gcode", "w") as gfile:
     generateSetup(gfile, params)
     generateGCode(gfile, params, 0.19, perimeters)

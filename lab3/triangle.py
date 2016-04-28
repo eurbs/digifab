@@ -15,12 +15,6 @@ The Triangle Class
 In-memory representation of the STL triangles.
 """
 
-# TODO: When importing stl, truncate (or round?) to 3 decimal points
-# TODO: When importing stl, check to see if any triangle is parallel to the z axis
-#       Make a triangle function that checks if all Z points are the same
-# TODO: When importing stl, if there is ever a parallel triangle that is NOT on a cutting plane,
-#       raise those z's
-# TODO: do above, but for when one single line of the triangle intersects the cutting plane
 class Triangle(object):
   def __init__(self, points, normal=None):
     """
@@ -63,16 +57,13 @@ class Triangle(object):
     return None
 
   def adjustToCuttingPlane(self, layerHeight):
-    """If a triangle is parallel to or has a side that falls on the Z axis, we
-    adjust those points such that they fall on a cutting plane rather than between
-    cutting planes.
+    """If a triangle is parallel to the Z axis, we adjust those points such that
+    they fall on a cutting plane rather than between cutting planes.
 
     Assumes 0.001 <= layerHeight < 1mm
 
     Note: this isn't perfect and doesn't recalculate normals
     """
-    # note: these new z's aren't rounded/truncated to 3 decimal places -- may cause problems
-    # TODO: fix truncation
     segment = self._segmentInZ()
     mod = int(layerHeight * 1000)
     if self._isParallelToZ():
@@ -87,43 +78,7 @@ class Triangle(object):
         # Recalculate the min and max z's
         self.z_min = self._getMinZ()
         self.z_max = self._getMaxZ()
-    # elif segment:
-    #   # NICK: this is where a full size is parallel with normal, if you comment this out, things
-    #   # kind of work, however, you don't get a perimeter at the final layer
-    #   idx1 = segment[0]
-    #   idx2 = segment[1]
-    #   toMod = int(self.points[idx1].z * 1000)
-    #   if (toMod % mod) != 0:
-    #     # Not on cutting plane, move this segment to the next closest one above
-    #     new_z = math.ceil(toMod / float(mod)) * float(mod) / 1000
-    #     # Update the points in the triangle
-    #     self.points[idx1] = Point3D(self.points[idx1].x, self.points[idx1].y, new_z)
-    #     self.points[idx2] = Point3D(self.points[idx2].x, self.points[idx2].y, new_z)
-    #     # Recalculate the min and max z's
-    #     self.z_min = self._getMinZ()
-    #     self.z_max = self._getMaxZ()
 
-    # Below the code warps all of the Z's to be on the cutting plane
-    # mod = int(layerHeight * 1000)
-    # new_points = []
-    # for point in self.points:
-    #   toMod = int(point.z * 1000)
-    #   if (toMod % mod) != 0:
-    #     # We have a z not on a cutting plane, move to the next closest one
-    #     # new_z = math.ceil(toMod / float(mod)) * float(mod) / 1000.0 # Find next closest multiple
-    #     new_z = round(toMod / float(mod)) * float(mod) / 1000.0 # Find next closest multiple # EXPERIMENTAL (TODO)
-    #     new_points.append(Point3D(point.x, point.y, new_z))
-    #   else:
-    #     new_points.append(point)
-    # self.points = new_points
-    # self.z_min = self._getMinZ()  # reset zmin and zmax
-    # self.z_max = self._getMaxZ()
-
-    
-    # question: how do i figure out which is the outward facing normal
-    # and which is the inside facing normal? Do I need to rely on the normals
-    # provided to me? Do I just have to calculate both? how does this work?
-    # http://mathworld.wolfram.com/NormalVector.html
 
   def _getMinZ(self):
     """Returns the minimum z value"""
@@ -167,7 +122,7 @@ class Triangle(object):
 
   def _segmentPlaneIntersection(self, p1, p2, plane):
     """ Used as a helper in plane triangle intersection """
-    #an arbitrary small number to deal with numerical percision issues
+    # an arbitrary small number to deal with numerical percision issues
     espilon = 0.001
     pointsOnPlane = []
 
@@ -185,13 +140,11 @@ class Triangle(object):
       return pointsOnPlane
 
     #if the points are on the same side of the plane, there can be no intersection
-    #print "d1 is " + str(d1) + " d2 is " + str(d2)
     if(d1*d2 > espilon):
       #print "Same side of plane error"
       return pointsOnPlane
 
     place = d1 / (d1 - d2)
-    # P1 + place * (P2 - P1)
     temp1 = numpy.subtract(p2.a, p1.a)
     temp2 = numpy.multiply(temp1, place)
     pointsOnPlane.append(Point3D(list(numpy.add(p1.a, temp2))))
@@ -205,18 +158,15 @@ class Triangle(object):
     countingX1 = v1.x
     countingX2 = v1.x
     scanLineY = v1.y
-    #print "v1 " + str(v1.y) + " v2 " + str(v2.y)
-    while(scanLineY >= v2.y): # emilee: flipped sign? more bugs? i told you so.
+
+    while(scanLineY >= v2.y):
       start = Point3D(countingX1, scanLineY, z)
       end = Point3D(countingX2, scanLineY, z)
-      #print "start: " + str(start) + "end: " + str(end)
       lineSeggies.append(Segment(start, end, None)) # note: probably dangerous
 
       countingX1 -= (inverseSlope1*thickness)
       countingX2 -= (inverseSlope2*thickness)
-      #This might be broken here... good place to come back to
-      #Do i need to multiply the slope by thickness? does each step step enough
-      scanLineY -= thickness  # emilee: i told you so
+      scanLineY -= thickness
     return lineSeggies
 
   def _fillTopFlatTriangle(self, v1, v2, v3, z, thickness):
@@ -234,8 +184,6 @@ class Triangle(object):
 
       countingX1 += (inverseSlope1*thickness)
       countingX2 += (inverseSlope2*thickness)
-      #This might be broken here... good place to come back to
-      #Do i need to multiply the slope by thickness? does each step step enough
       scanLineY += thickness
     return lineSeggies
 
@@ -280,34 +228,10 @@ class Triangle(object):
 
   def intersectPlane(self, plane, thickness):
     pointsOnPlane = []
-    #print "Points 1 and 2:"
     pointsOnPlane.extend(self._segmentPlaneIntersection(self.points[0], self.points[1], plane))
-    #print "Points 2 and 3:"
     pointsOnPlane.extend(self._segmentPlaneIntersection(self.points[1], self.points[2], plane))
-    #print "Points 3 and 0:"
     pointsOnPlane.extend(self._segmentPlaneIntersection(self.points[2], self.points[0], plane))
     deleteDupes = deleteDuplicates(pointsOnPlane)
-    # deleteDupes = set(pointsOnPlane)
-
-    # #Sanity check to avoid nan points
-    # #And near duplicates - points that are episilon from being the same point
-    # bad = []
-    # for i,p in enumerate(deleteDupes):
-    #   for coord in p.a:
-    #     if math.isnan(coord):
-    #       bad.append(p)
-    #       break
-    #   for compare in deleteDupes:
-    #     if compare == p or compare in bad:
-    #       continue
-    #     if(isclose(p.x, compare.x, episilon) and
-    #     isclose(p.y, compare.y, episilon) and
-    #     isclose(p.z, compare.z, episilon)):
-    #       bad.append(p)
-    #       break
-
-    # for ugly in bad:
-    #   deleteDupes.remove(ugly)
 
     if(len(deleteDupes) > 2):
       print self
@@ -321,7 +245,7 @@ class Triangle(object):
       return []
     if(len(seggy) == 1):
       # triangle intersects plane at single point
-      #return [Segment(seggy[0], seggy[0])]
+      # return [Segment(seggy[0], seggy[0])]
       return []
 
     # --- Get the perpendicular line that faces inward ---

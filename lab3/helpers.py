@@ -39,7 +39,10 @@ def normalize2DVec(v):
   x = v[0]
   y = v[1]
   magnitude = math.sqrt(x*x + y*y)
-  return [x/magnitude, y/magnitude]
+  if magnitude:
+    return [x/magnitude, y/magnitude]
+  else:
+    return [x, y]
 
 def deleteDuplicates(pointsList):
   """Given a list of points, remove duplicate points"""

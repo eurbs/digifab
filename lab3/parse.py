@@ -45,12 +45,6 @@ def parseInput():
 
   return (args.path, perimeterLayers, infill, layerHeight, thickness, support)
 
-def round3Decimal(f):
-  """Rounds to 3 decimal places"""
-  # return float("{:.3f}".format(f))
-  # TODO: allow truncation. right not too tired and too afraid that it will mess nick's thing up
-  return float(f)
-
 def parseSTL(filename):
   """Given a filename in the cwd, opens file and parses STL.
   Currently, we only support ASCII STL files with proper normals.
@@ -66,17 +60,12 @@ def parseSTL(filename):
     for line in f:
       contents = line.split()
       if contents[0] == "vertex":
-        vertex = Point3D(round3Decimal(float(contents[1])),
-                         round3Decimal(float(contents[2])), 
-                         round3Decimal(float(contents[3])))
+        vertex = Point3D(float(contents[1]), float(contents[2]), float(contents[3]))
         points.append(vertex)
       elif contents[0] == "facet":
-        normal = Point3D(round3Decimal(float(contents[2])),
-                         round3Decimal(float(contents[3])),
-                         round3Decimal(float(contents[4])))
+        normal = Point3D(float(contents[2]), float(contents[3]), float(contents[4]))
       elif contents[0] == "endfacet":
         triangle = Triangle(points, normal)
-        # TODO: analyze the triangle and move things to cutting plane
         triangles.append(Triangle(points, normal))
         # Reset for next iteration
         points = []   # Can't wait to move to python 3.3, points.clear() would work
