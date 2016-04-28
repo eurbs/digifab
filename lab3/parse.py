@@ -5,7 +5,6 @@ import argparse
 Emilee Urbanek and Nick Confrey
 CMSC 22010: Digital Fabrication
 Lab 3
-Due: 4/25
 
 ---
 
