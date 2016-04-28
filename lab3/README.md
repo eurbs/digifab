@@ -4,7 +4,8 @@ We created a slicer that reads in stl geometry files and outputs gcode suitable 
 
 ### Usage:
 
-- run `python slicer.py [stl file name]`
+- run `python slicer.py [stl file path]`
+- for more options, run `python slicer.py -h` (Perimeter layers, layer height, etc)
 - Some good choices are in the samples folder, namely `samples/sphere.stl` or `samples/cube.stl`
 - Output will be the stl file name in the samples folder. So `sphere.stl` becomes `sphere.gcode`.
 - Use http://gcode.ws to view the gcode
@@ -13,6 +14,7 @@ We created a slicer that reads in stl geometry files and outputs gcode suitable 
 
 - Created a geometry filestructure infrastructure to hold all data in software. This included writing `point3D.py`, `triangle.py`, `plane.py`. (Emilee)
 - Parsed STL triangles into memory and organized them for easy computation (Emilee)
+- Argument parsing and parameters data structure (Emilee)
 - Defined a cutting plane and an intersection function for triangles to determine if and when a triangle intersects the cutting plane (Nick)
 - Wrote a naive algorithm for turning the line segments into a perimeter per z slice (Nick)
 - Wrote GCode to turn perimeters into actual printer moves. This included writing a preamble and cleanup code on top of parsing incoming perimeters to move the print head. Calculations were also done to determine how much filament to extrude per segment (Emilee)

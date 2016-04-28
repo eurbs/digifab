@@ -57,12 +57,12 @@ def makePerimeter(segmentsPerLayer):
 
 def main():
   #Step 0: Parse user input to get constants
-  filename, perimeterLayers, infill, layerHeight, thickness, support = parseInput()
-  params = Parameters(filename, perimeterLayers, infill, layerHeight, thickness, support)
+  params = parseInput()
   gfile = open(params.gcodefilename, "w")
+  thickness = params.thickness
   
   #Step 1: Parse the STL into a list of triangles
-  triangles = parseSTL(filename)
+  triangles = parseSTL(params.stlfilename)
   for triangle in triangles:
     triangle.adjustToCuttingPlane(params.layerHeight)
 
@@ -110,7 +110,7 @@ def main():
     gcode.generateGCodeParallel(gfile, params, layer, parallelTrianglesInLayer)
 
     #Loop until top
-    layer += layerHeight
+    layer += params.layerHeight
     cuttingPlane.up(layer)
   
   # Cleanup 

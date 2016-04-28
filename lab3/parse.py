@@ -1,6 +1,7 @@
 from helpers import *
 from triangle import *
 import argparse
+import sys
 """
 Emilee Urbanek and Nick Confrey
 CMSC 22010: Digital Fabrication
@@ -27,23 +28,31 @@ class Parameters(object):
 
 def parseInput():
   parser = argparse.ArgumentParser()
-  parser.add_argument("path", help="path to the stl file (just the filename if in cwd)")
-  # parser.add_argument(
-    # "--layer_height", type=float, help="set the layer height; default is 0.19mm", default=0.19)
-  # parser.add_argument("--infill", type=int, help="set infill; default is 20%", default=20)
-  # parser.add_argument("--infill", help="set infill; default is 20%", action="store_const", const=)
-  # parser.add_argument("")
+  parser.add_argument("path", action="store",
+                      help="path to the stl file")
+  parser.add_argument("--perimeterlayers", action="store", type=int, default=2,
+                      help="number of perimeter layers, default: 2")
+  parser.add_argument("--infill", action="store", type=int, default=20,
+                      help="number from 0 to 100 for %%infill, default: 20")
+  parser.add_argument("--layerHeight", action="store", type=float, default=0.19,
+                      help="layer height in mm, default: 0.19")
+  parser.add_argument("--headdiameter", action="store", type=float, default=0.4,
+                      help="diameter of print head in mm, default: 0.4")
+  parser.add_argument("--support", action="store_true", default=False,
+                      help="use this flag if you need support. (not supported)")
+
+
   args = parser.parse_args()
 
-  # do defaults for now, worry about parsing properly later
-  # TODO: properly parse options
-  perimeterLayers = 2
-  infill = 0.20
-  layerHeight = 0.19
-  thickness = 0.4     # thickness of the filament when extruded (size of nozzle)
-  support = False
+  params = Parameters(filename=args.path, 
+                      perimeterLayers=args.perimeterlayers,
+                      infill=(float(args.infill)/100.0),
+                      layerHeight=args.layerHeight,
+                      thickness=args.headdiameter,
+                      # support=args.support) # note: not supported
+                      support=False)
 
-  return (args.path, perimeterLayers, infill, layerHeight, thickness, support)
+  return params
 
 def parseSTL(filename):
   """Given a filename in the cwd, opens file and parses STL.
