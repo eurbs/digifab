@@ -37,6 +37,8 @@ def calculateExtrudeAmount(x1, y1, x2, y2, thickness):
 # ========================= GCODE GENERATION FUNCTIONS =========================
 # ==============================================================================
 
+# TODO: FORMAT ALL X AND Y CODES TO {:3.3f} and E CODES TO {:3.5f}.
+
 def generateSetup(gfile, params):
   """Generates the setup GCode preceeding all of the printing
 
@@ -75,6 +77,47 @@ def generateSetup(gfile, params):
   ]
   gfile.write("\n".join(lines))
 
+def generateGCodePerim(gfile, params, perimeter):
+  lines = []
+  first_point =  perimeter[0].start
+  lines.append("G1 X{:3.6f} Y{:3.6f}".format(first_point.x, first_point.y)) # move no extrude
+  for seggy in perimeter:
+    point_start = seggy.start
+    point_end = seggy.end
+    extrude_amount = calculateExtrudeAmount(
+      point_start.x, point_start.y, point_end.x, point_end.y, params.thickness)
+    updateExtruded(extrude_amount)
+    # move with extrude
+    lines.append("G1 X{:3.6f} Y{:3.6f} E{:3.6f}".format(point_end.x, point_end.y, extruded))
+  lines.append("")
+  gfile.write("\n".join(lines)) 
+
+def generateGCodeInfill(gfile, params, layerZ, perimeters):
+  """Given a gfile, parameters, and a list of perimeters, generate gcode for infill"""
+  # Determine if horizontal or vertical infill
+  if isclose(layerZ % params.layerHeight, 0.0):
+    direction = "horizontal"
+  else:
+    direction = "vertical"
+
+  # Generate the GCode for the infill
+  lines = []
+  lines.append("; INFILL")
+  infill = makeInfill(perimeters, params.infill, direction)
+  for points in infill:
+    # move to start point
+    lines.append("G1 X{:3.6f} Y{:3.6f}".format(points[0].x, points[0].y))
+    for i in xrange(points-1):
+      start = points[i]
+      end = points[i+1]
+      if i % 2 == 0: # We're inside, so extrude
+        extrude_amound = calculateExtrudeAmount(start.x, start.y, end.x, end.y, params.thickness)
+        updateExtruded(extrude_amount)
+        lines.append("G1 X{:3.3f} Y{:3.3f} E{:3.5f}".format(end.x, end.y, extruded))
+      else: # We're outside, so don't extrude
+        lines.append("G1 X{:3.3f} Y{:3.3f}".format(end.x, end.y))
+  lines.append("")
+  gfile.write("\n".join(lines))
 
 def generateGCode(gfile, params, layerZ, perimeters):
   """Generates the setup GCode preceeding all of the printing
@@ -91,36 +134,34 @@ def generateGCode(gfile, params, layerZ, perimeters):
 
   gfile.write("; LAYER Z={:3.6f}\n".format(layerZ))
   gfile.write("G1 Z{:3.6f} ; raise print head\n".format(layerZ))
-  lines = []
   # TODO: handle parallel "perimeters" (actually areas)
-  for i, perim in enumerate(perimeters):
-    # for wall in xrange(params.perimeterLayers):
-      # TODO MAKE SMALLER AND SMALLER FOR PERIMETERS AND WALLS
-      # IDEALLY, WE WANT TO GO INNER TO OUTER, BUT WE'RE GOING OUTER TO INNER
-      # Calculate new width
-      # note: calculating new width is naive, we assume there's enough space.
-      # todo: make it not naive
-      # note: this isn't actually going to work. need a way to know if we're
-      #       on the left/right, up/down quadrant of a perimeter...
-      # it gets complicated if and when a segment crosses over the quadrant..
-      # that being said, we're calculating a distance that changes based on the slopes..
-      # width = float(wall) * params.thickness
 
-      # Generate code
-    lines.append("; PERIMETER {}".format(i))
-    first_point =  perim[0].start
-    lines.append("G1 X{:3.6f} Y{:3.6f}".format(first_point.x, first_point.y)) # move no extrude
-    for seggy in perim:
-      point_start = seggy.start
-      point_end = seggy.end
-      extrude_amount = calculateExtrudeAmount(
-        point_start.x, point_start.y, point_end.x, point_end.y, params.thickness)
-      updateExtruded(extrude_amount)
-      # move with extrude
-      lines.append("G1 X{:3.6f} Y{:3.6f} E{:3.6f}".format(point_end.x, point_end.y, extruded)) 
+  # --- Generate List of concentric perimeters ---
+  # Note: uncomment when resizePerimeters works
+  # concentricPerimeters = []
+  # concentricPerimeters.append(perimeters)
+  # for i in xrange(params.perimeterLayers):
+  #   # This includes appending an extra perimeter to be passed to the infill generator
+  #   concentricPerimeters.append(resizePerimeters("smaller", params, concentricPerimeters[i]))
 
-  lines.append("")
-  gfile.write("\n".join(lines))
+  # --- Generate GCode for the perimeters ---
+  # OLD CODE, note: DELETE when resizePerimeters works
+  for perim in perimeters:
+    generateGCodePerim(gfile, params, perim)
+
+  # Note: uncomment when resizePerimeters works
+  # # We're iterating down the columns of concentric perimeters
+  # for j in xrange(concentricPerimeters[0]):
+  #   # We're not going to do the infill perimeter until after all perimeters are done
+  #   gfile.write("; PERIMETER {}\n".format(j))
+  #   for i in xrange(concentricPerimeters-1):
+  #     generateGCodePerim(gfile, params, concentricPerimeters[i][j])
+
+  # --- Generate the code for the infill ---
+  # infill_perimeters = concentricPerimeters.pop() # Pops off last element
+  infill_perimeters = perimeters # DEBUG temporary for nick
+  # generateGCodeInfill(gfile, params, layerZ, infill_perimeters) NICK UNCOMMENT TO VISUALIZE
+
   return
 
 def generateGCodeParallel(gfile, params, layerZ, parallelTriangleSegments):
