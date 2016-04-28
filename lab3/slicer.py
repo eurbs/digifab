@@ -179,6 +179,11 @@ def main():
     #     print "Layer #" + str(i)
     #     for point in fill:
     #       print "\t" + str(point)
+    print "printing perimeters for layer {}".format(layer)
+    if perimeters: # TODO LAYER 0 PERIMETER
+      for i, perimeter in enumerate(perimeters):
+        print "perimeter #{}".format(i)
+        map(printFunc, perimeter)
     
     print "generating gcode for layer {!s} perimeters".format(layer) # DEBUG
     gcode.generateGCode(gfile, params, layer, perimeters)

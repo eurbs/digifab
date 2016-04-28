@@ -22,6 +22,7 @@ class Parameters(object):
     self.thickness = thickness
     self.support = support
     self.temperature = 210
+    self.filamentThickness = 1.75
 
 
 def parseInput():

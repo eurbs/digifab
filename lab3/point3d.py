@@ -33,7 +33,12 @@ class Point3D(object):
 
   def __eq__(self, other):
     """Assumes other is a Point3D as well"""
-    return (self.x == other.x) and (self.y == other.y) and (self.z == other.z)
+    inst = isinstance(other, self.__class__)
+    eq = isclose(self.x, other.x) and isclose(self.y, other.y) and isclose(self.z, other.z)
+    return inst and eq
+
+  def __ne__(self, other):
+    return not self.__eq__(other)
 
   def close(self, other):
     #assumes other is also a point

@@ -31,7 +31,7 @@ def calculateExtrudeAmount(x1, y1, x2, y2, thickness):
   """Calculates the extrude amount moving from (x1, y1) to (x2, y2)"""
   # TODO: this is messed up somehow
   dist = math.sqrt(math.pow(x2-x1, 2) + math.pow(y2-y1, 2))
-  amt = thickness * dist
+  amt = thickness * dist / 1.75 # note: hard coded, todo: make thickness just be params
   return amt
 
 #return type: list of lists of points by either x or y coordinate
@@ -86,6 +86,49 @@ def makeInfill(perimeters, infill, direction):
 
   return final
 
+def resizePerimeters(params, perimeters, brim=False, raft=False):
+  """Resizes perimeters using params.thickness toward the inside of that perimeter
+  using the perpIn(dicular) unit vector to each segment in the perimeter.
+
+  If brim or raft is specified, this will generate a brim or raft (cool right?)
+  Note: brim and raft not yet functional (less cool)
+  """
+  if brim:
+    raise Exception("brim not yet supported") # TODO
+  if raft:
+    raise Exception("raft not yet supported") # TODO
+
+  thickness = params.thickness
+  new_perimeters = []
+  for perimeter in perimeters:
+    new_seggies = []
+    for seggy in perimeter: # Make copies to populate  
+      new_seggies.append(Segment(None, None, seggy.perpIn))
+
+    for i in xrange(len(perimeter)): # Start point translation algorithm
+      seggy1 = perimeter[i]
+      seggy2 = perimeter[(i+1)%len(perimeter)]
+      new_seggy1 = new_seggies[i]
+      new_seggy2 = new_seggies[(i+1)%len(new_seggies)] # len perimeter and new_seggies should be same
+      if seggy1.end != seggy2.start: # note: is this how to properly invoke __eq__()?
+        print seggy1.end
+        print seggy2.start
+        # raise Exception("Found neighboring segments in perimeter which don't share a point")
+        print "Found neighboring segments in perimeter which don't share a point"
+        print "Considering float imperfections and imperfections in perimeter handling, ignoring"
+        print "Will just consider the end point of the first point."
+        print "If the points printed above are REALLY different, there's a bigger problem"
+      point2d = [seggy1.end.x, seggy1.end.y]  # is the same as seggy2.y
+      # Find unit vector of distance thickness from the origin in direction of perpendicular
+      trans_end1 = map(lambda x: x * thickness, seggy1.perpIn)
+      trans_start2 = map(lambda x: x * thickness, seggy2.perpIn)
+      trans_amt = map(lambda x, y: x + y, trans_end1, trans_start2)
+      new_point2d = map(lambda x, y: x + y, point2d, trans_amt)
+      # Populate the new segments with translated point
+      new_seggy1.end = Point3D(new_point2d[0], new_point2d[1], float(0))
+      new_seggy2.start = Point3D(new_point2d[0], new_point2d[1], float(0))
+    new_perimeters.append(new_seggies)
+  return new_perimeters
 
 # ==============================================================================
 # ========================= GCODE GENERATION FUNCTIONS =========================
@@ -167,8 +210,6 @@ def generateGCodeInfill(gfile, params, layerZ, perimeters):
     if not points:
       continue
     # move to start point
-    #map(printFunc, points)
-    #print type(points)
     lines.append("G1 X{:3.6f} Y{:3.6f}".format(points[0].x, points[0].y))
     for i in xrange(len(points)-1):
       start = points[i]
@@ -201,28 +242,28 @@ def generateGCode(gfile, params, layerZ, perimeters):
 
   # --- Generate List of concentric perimeters ---
   # Note: uncomment when resizePerimeters works
-  # concentricPerimeters = []
-  # concentricPerimeters.append(perimeters)
-  # for i in xrange(params.perimeterLayers):
-  #   # This includes appending an extra perimeter to be passed to the infill generator
-  #   concentricPerimeters.append(resizePerimeters("smaller", params, concentricPerimeters[i]))
+  concentricPerimeters = []
+  concentricPerimeters.append(perimeters)
+  for i in xrange(params.perimeterLayers):
+    # This includes appending an extra perimeter to be passed to the infill generator
+    concentricPerimeters.append(resizePerimeters(params, concentricPerimeters[i]))
 
   # --- Generate GCode for the perimeters ---
   # OLD CODE, note: DELETE when resizePerimeters works
-  for perim in perimeters:
-    generateGCodePerim(gfile, params, perim)
+  # for perim in perimeters:
+  #   generateGCodePerim(gfile, params, perim)
 
   # Note: uncomment when resizePerimeters works
-  # # We're iterating down the columns of concentric perimeters
-  # for j in xrange(concentricPerimeters[0]):
-  #   # We're not going to do the infill perimeter until after all perimeters are done
-  #   gfile.write("; PERIMETER {}\n".format(j))
-  #   for i in xrange(concentricPerimeters-1):
-  #     generateGCodePerim(gfile, params, concentricPerimeters[i][j])
+  # We're iterating down the columns of concentric perimeters
+  for j in xrange(len(concentricPerimeters[0])):
+    # We're not going to do the infill perimeter until after all perimeters are done
+    gfile.write("; PERIMETER {}\n".format(j))
+    for i in xrange(len(concentricPerimeters)-1):
+      generateGCodePerim(gfile, params, concentricPerimeters[i][j])
 
   # --- Generate the code for the infill ---
-  # infill_perimeters = concentricPerimeters.pop() # Pops off last element
-  infill_perimeters = perimeters # DEBUG temporary for nick
+  infill_perimeters = concentricPerimeters.pop() # Pops off last element
+  # infill_perimeters = perimeters # DEBUG temporary for nick
   generateGCodeInfill(gfile, params, layerZ, infill_perimeters)
 
   return
@@ -279,35 +320,28 @@ def generateCleanup(gfile):
 
 def test():
   """Because we're not using a real testing framework"""
-  params = Parameters(filename="notused", perimeterLayers=1, infill=.20,
+  params = Parameters(filename="notused", perimeterLayers=3, infill=.20,
                       layerHeight=.19, thickness=0.4, support=False)
 
   # Test data from layer 0.19 of the 3mmBox
   perimeter = [
-    Point3D(10, 15, .19),
-    Point3D(10, 5.6333, .19), # where does this number come from??? (5.6333)
-    Point3D(10, 5, .19),
-    Point3D(10, -4.3667, .19),
-    Point3D(10, -5, .19),
-    Point3D(19.36667, -5, .19),
-    Point3D(20, -5, .19),
-    Point3D(29.36667, -5, .19),
-    Point3D(30, -5, .19),
-    Point3D(30, 4.36667, .19),
-    Point3D(30, 5, .19),
-    Point3D(30, 14.36667, .19),
-    Point3D(30, 15, .19),
-    Point3D(20.63333, 15, .19),
-    Point3D(20, 15, .19),
-    Point3D(10.63333, 15, .19),
-    Point3D(10, 15, .19),       # return to first point
+    Segment(Point3D(.19, 0.0, .19), Point3D(0.0, 0.0, .19), [0.0, 1.0]),
+    Segment(Point3D(0.0, 0.0, 0.19), Point3D(0.0, 0.19, .19), [1.0, 0.0]),
+    Segment(Point3D(0.0, .19, .19), Point3D(0.0, 15.0, .19), [1.0, 0.0]),
+    Segment(Point3D(0.0, 15.0, .19), Point3D(14.810, 15.0, .19), [0.0, -1.0]),
+    Segment(Point3D(14.810, 15.0, .19), Point3D(15.0, 15.0, .19), [0, -1.0]),
+    Segment(Point3D(15.0, 15.0, .19), Point3D(15.0, 14.81, .19), [-1.0, 0.0]),
+    Segment(Point3D(15.0, 14.81, .19), Point3D(15.0, 0.0, .19), [-1.0, 0.0]),
+    Segment(Point3D(15.0, 0.0, .19), Point3D(0.19, 0.0, .19), [0.0, 1.0])
   ]
   perimeters = [perimeter]
+  print "=============== testing perimeter resizing ==============="
+  map(printFunc, resizePerimeters(params, perimeters)[0])
+
+  # print "=============== TEsting gcode Generation ==============="
   with open("test_gcode.gcode", "w") as gfile:
     generateSetup(gfile, params)
-    generateGCode(gfile, params, 0.0, perimeters)
     generateGCode(gfile, params, 0.19, perimeters)
-    generateGCode(gfile, params, 0.38, perimeters)
     generateCleanup(gfile)
 
   print "success"

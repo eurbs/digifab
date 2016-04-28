@@ -326,7 +326,9 @@ class Triangle(object):
 
     # --- Get the perpendicular line that faces inward ---
     normal_projection = [self.normal.x, self.normal.y]
-    return [Segment(seggy[0], seggy[1], normalize2DVec(normal_projection))]
+    normalized = normalize2DVec(normal_projection)
+    inwardPerpIn = [normalized[0] * -1.0, normalized[1] * -1.0]  # Switch direction, point inward
+    return [Segment(seggy[0], seggy[1], inwardPerpIn)]
 
 
 def test():
