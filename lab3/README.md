@@ -29,10 +29,11 @@ We created a slicer that reads in stl geometry files and outputs gcode suitable 
 3. **Make resizePerimeters() less naive**. Right now, `resizePerimeters()` is incredibly naive. It trusts that the user gives enough space for the inside walls, but sometimes that simply isn't the case. We'd have to create an intersection detection algorithm to use while generating the inner walls to make sure that the inner walls don't intersect (again, see picture above).
 4. **Optimize "Connecting the Dots"**. Right now, this is an `O(n^2)` algorithm. We were going to do a game of hash and find, but the float values weren't cooperating and we'd need to ensure all line segments had the start and end in the right direction, and we couldn't quite figure out a rule for that.
 5. **Improve infill**. Right now our line intersection algorithm for determining infill is a bit wonky and often skips lines. If we had time, we would go back and tighten this up. Additionally, infill raster scans and fills only in the -x to +x direction. We would like to, at the very least, snake the raster filling and alternate on every layer whether the infill is horizontal or vertical. We'd then follow a very simple checkerboard infill pattern. 
-6. *Use a testing framework* This lab turned out to be a full fledged project. Though we have some primative unit tests setup in each file, they're not really understandable by anyone except for us, and much of the intersection and perimeter functionalities do not have unit tests, which led to exceptionally difficult debug sessions. If we had unit tests, we'd probably be able to figure out why infill infills sporadically as well.
-7. *Create supports*. Though this was initially part of the assignment, we didn't manage to get around to it :(
-8. *Center the object on the printbed*
-9. *Draw circle around object before printing* this gets the extrusion going for better sticking
+6. **Use a testing framework** This lab turned out to be a full fledged project. Though we have some primative unit tests setup in each file, they're not really understandable by anyone except for us, and much of the intersection and perimeter functionalities do not have unit tests, which led to exceptionally difficult debug sessions. If we had unit tests, we'd probably be able to figure out why infill infills sporadically as well.
+7. **Create supports**. Though this was initially part of the assignment, we didn't manage to get around to it :(
+8. **Center the object on the printbed**
+9. **Draw circle around object before printing** this gets the extrusion going for better sticking
+10. **Option for output directory** And default to a gcode directory.
 
 ## Summary
 
