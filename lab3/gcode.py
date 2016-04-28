@@ -236,8 +236,9 @@ def generateGCode(gfile, params, layerZ, perimeters):
       generateGCodePerim(gfile, params, concentricPerimeters[i][j])
 
   # --- Generate the code for the infill ---
-  infill_perimeters = concentricPerimeters.pop() # Pops off last element
-  generateGCodeInfill(gfile, params, layerZ, infill_perimeters)
+  if params.infill*100 != 0:
+    infill_perimeters = concentricPerimeters.pop() # Pops off last element
+    generateGCodeInfill(gfile, params, layerZ, infill_perimeters)
   return
 
 def generateGCodeParallel(gfile, params, layerZ, parallelTriangleSegments):
