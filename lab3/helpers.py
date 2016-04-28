@@ -1,3 +1,5 @@
+#import point3d
+import math
 """
 Emilee Urbanek and Nick Confrey
 CMSC 22010: Digital Fabrication
@@ -33,3 +35,28 @@ def floatLT(a, b):
 def printFunc(x):
   """Since Python2 doesn't have a print function"""
   print x
+
+def deleteDuplicates(pointsList):
+  """Given a list of points, remove duplicate points"""
+  deleteDupes = set(pointsList)
+
+  #Sanity check to avoid nan points
+  #And near duplicates - points that are episilon from being the same point
+  bad = []
+  for i,p in enumerate(deleteDupes):
+    for coord in p.a:
+      if math.isnan(coord):
+        bad.append(p)
+        break
+    for compare in deleteDupes:
+      if compare == p or compare in bad:
+        continue
+      if(isclose(p.x, compare.x, episilon) and
+      isclose(p.y, compare.y, episilon) and
+      isclose(p.z, compare.z, episilon)):
+        bad.append(p)
+        break
+
+  for ugly in bad:
+    deleteDupes.remove(ugly)
+  return deleteDupes

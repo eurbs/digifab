@@ -167,11 +167,11 @@ def main():
     #   layer += layerHeight
     #   cuttingPlane.up(layer)
     #   continue # there's a magical floating object!
-    if perimeters:
-      for i,perm in enumerate(perimeters): # DEBUG (for loop)
-        print "Perimeter #" + str(i)
-        for per in perm:
-          print "\t " + str(per)
+    # if perimeters:
+    #   for i,perm in enumerate(perimeters): # DEBUG (for loop)
+    #     print "Perimeter #" + str(i)
+    #     for per in perm:
+    #       print "\t " + str(per)
 
     # infillList = makeInfill(perimeters, .50, "blah")
     # if infillList:
@@ -185,7 +185,6 @@ def main():
 
     print "generating gcode for case2 (parallel to cutting plane) triangles" # DEBUG
     gcode.generateGCodeParallel(gfile, params, layer, parallelTrianglesInLayer)
-
 
 
     #Step 7: Loop over all line segments in data structure, output print head moves in gcode

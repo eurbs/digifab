@@ -42,6 +42,8 @@ def makeInfill(perimeters, infill, direction):
     return None
   final = []
   allSegments = []
+  print "in make infill"
+  print "len perimeters: {}".format(len(perimeters))
   maxY = perimeters[0][0].start.y
   minY = perimeters[0][0].start.y 
   maxX = perimeters[0][0].start.x
@@ -53,6 +55,7 @@ def makeInfill(perimeters, infill, direction):
       maxX = max(maxX, max(segment.start.x, segment.end.x))
       minX = min(minX, min(segment.start.x, segment.end.x))
       allSegments.append(segment)
+  print "len allsegments: {}".format(len(allSegments))
 
   #linear interpolation between 0-100% infill
   layerThickness = .4
@@ -79,8 +82,9 @@ def makeInfill(perimeters, infill, direction):
     if(not lineHits):
       print "Y value failure: " + str(scan)
       #raise Exception("Uhoh! The infill finder did not find a inside part.")
-    final.append(lineHits)
+    final.append(list(deleteDuplicates(lineHits)))
     scan += increment
+
   return final
 
 
@@ -155,12 +159,17 @@ def generateGCodeInfill(gfile, params, layerZ, perimeters):
   lines = []
   lines.append("; INFILL")
   infill = makeInfill(perimeters, params.infill, direction)
+  if infill:
+      for i,fill in enumerate(infill):
+        print "Layer #" + str(i)
+        for point in fill:
+          print "\t" + str(point)
   for points in infill:
     if not points:
       continue
     # move to start point
-    map(printFunc, points)
-    print type(points)
+    #map(printFunc, points)
+    #print type(points)
     lines.append("G1 X{:3.6f} Y{:3.6f}".format(points[0].x, points[0].y))
     for i in xrange(len(points)-1):
       start = points[i]

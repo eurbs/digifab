@@ -287,27 +287,28 @@ class Triangle(object):
     pointsOnPlane.extend(self._segmentPlaneIntersection(self.points[1], self.points[2], plane))
     #print "Points 3 and 0:"
     pointsOnPlane.extend(self._segmentPlaneIntersection(self.points[2], self.points[0], plane))
-    deleteDupes = set(pointsOnPlane)
+    deleteDupes = deleteDuplicates(pointsOnPlane)
+    # deleteDupes = set(pointsOnPlane)
 
-    #Sanity check to avoid nan points
-    #And near duplicates - points that are episilon from being the same point
-    bad = []
-    for i,p in enumerate(deleteDupes):
-      for coord in p.a:
-        if math.isnan(coord):
-          bad.append(p)
-          break
-      for compare in deleteDupes:
-        if compare == p or compare in bad:
-          continue
-        if(isclose(p.x, compare.x, episilon) and
-        isclose(p.y, compare.y, episilon) and
-        isclose(p.z, compare.z, episilon)):
-          bad.append(p)
-          break
+    # #Sanity check to avoid nan points
+    # #And near duplicates - points that are episilon from being the same point
+    # bad = []
+    # for i,p in enumerate(deleteDupes):
+    #   for coord in p.a:
+    #     if math.isnan(coord):
+    #       bad.append(p)
+    #       break
+    #   for compare in deleteDupes:
+    #     if compare == p or compare in bad:
+    #       continue
+    #     if(isclose(p.x, compare.x, episilon) and
+    #     isclose(p.y, compare.y, episilon) and
+    #     isclose(p.z, compare.z, episilon)):
+    #       bad.append(p)
+    #       break
 
-    for ugly in bad:
-      deleteDupes.remove(ugly)
+    # for ugly in bad:
+    #   deleteDupes.remove(ugly)
 
     if(len(deleteDupes) > 2):
       print self
