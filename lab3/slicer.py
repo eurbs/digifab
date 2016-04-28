@@ -64,7 +64,7 @@ def makePerimeter(segmentsPerLayer):
       if(seg.end.close(search)):
         #print "Found it! On line " + str(seg)
         #print "Adding " + str(seg.start)
-        final[perimeterNumber].append(Segment(seg.end, seg.start))
+        final[perimeterNumber].append(Segment(seg.end, seg.start, seg.perpIn))
         segments.remove(seg)
         search = seg.start
         found = True
@@ -88,18 +88,13 @@ def makePerimeter(segmentsPerLayer):
 
   return final
 
-def pointsToSegments(perimeter):
-  segments = []
-  for i, point in enumerate(perimeter[:-1]):
-    segments.append(Segment(point, perimeter[i+1]))
-  return segments
 
-#return type: list of lists of points by either x or y coordinate
-#from min to max y
-def makeInfill(perimeter):
-  #assuming that a perimeter is a list of point3D
-  segmentPerimeter = pointsToSegments(perimeter)
-  print perimeter
+# def pointsToSegments(perimeter):
+#   segments = []
+#   for i, point in enumerate(perimeter[:-1]):
+#     segments.append(Segment(point, perimeter[i+1]))
+#   return segments
+
 
 def main():
   #Step 0: Parse user input to get constants
@@ -173,16 +168,21 @@ def main():
     #   layer += layerHeight
     #   cuttingPlane.up(layer)
     #   continue # there's a magical floating object!
-    print "AFTER SORTING!!!!!!!!!!!!!!!!!!"
     if perimeters:
       for i,perm in enumerate(perimeters): # DEBUG (for loop)
         print "Perimeter #" + str(i)
         for per in perm:
           print "\t " + str(per)
 
+    # infillList = makeInfill(perimeters, .50, "blah")
+    # if infillList:
+    #   for i,fill in enumerate(infillList):
+    #     print "Layer #" + str(i)
+    #     for point in fill:
+    #       print "\t" + str(point)
+    
     print "generating gcode for layer {!s} perimeters".format(layer) # DEBUG
     gcode.generateGCode(gfile, params, layer, perimeters)
-    #makeInfill(perimeters)
 
     print "generating gcode for case2 (parallel to cutting plane) triangles" # DEBUG
     gcode.generateGCodeParallel(gfile, params, layer, parallelTrianglesInLayer)

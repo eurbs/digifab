@@ -1,3 +1,4 @@
+import math
 """
 Emilee Urbanek and Nick Confrey
 CMSC 22010: Digital Fabrication
@@ -33,3 +34,10 @@ def floatLT(a, b):
 def printFunc(x):
   """Since Python2 doesn't have a print function"""
   print x
+
+def normalize2DVec(v):
+  """Normalizes a 2D vector represented as a list [x,y]"""
+  x = v[0]
+  y = v[1]
+  magnitude = math.sqrt(x*x + y*y)
+  return [x/magnitude, y/magnitude]

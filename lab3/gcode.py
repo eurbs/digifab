@@ -2,6 +2,8 @@ import math
 from point3d import Point3D
 from parse import Parameters # this will probs be circular, put Parametes in parse.py
 import sys
+from helpers import *
+from segment import *
 """
 Emilee Urbanek and Nick Confrey
 CMSC 22010: Digital Fabrication
@@ -32,6 +34,55 @@ def calculateExtrudeAmount(x1, y1, x2, y2, thickness):
   dist = math.sqrt(math.pow(x2-x1, 2) + math.pow(y2-y1, 2))
   amt = thickness * dist
   return amt
+
+#return type: list of lists of points by either x or y coordinate
+#from min to max y
+def makeInfill(perimeters, infill, direction):
+  if(not perimeters):
+    return None
+  final = []
+  allSegments = []
+  maxY = perimeters[0][0].start.y
+  minY = perimeters[0][0].start.y 
+  maxX = perimeters[0][0].start.x
+  minX = perimeters[0][0].start.x
+  for perimeter in perimeters:
+    for segment in perimeter:
+      maxY = max(maxY, max(segment.start.y, segment.end.y))
+      minY = min(minY, min(segment.start.y, segment.end.y))
+      maxX = max(maxX, max(segment.start.x, segment.end.x))
+      minX = min(minX, min(segment.start.x, segment.end.x))
+      allSegments.append(segment)
+
+  #linear interpolation between 0-100% infill
+  layerThickness = .4
+  increment = layerThickness + infill*(layerThickness - (maxY - minY))
+  increment = 1
+  print "increment is: " + str(increment)
+  #Optimize: is there a pretty way to get both of these in one pass?
+  # maxY = max(perm, key=lambda seg: max(seg.start.y, seg.end.y))
+  # minY = min(perm, key=lambda seg: min(seg.start.y, seg.end.y))
+  # maxX = max(perm, key=lambda seg: max(seg.start.x, seg.end.x))
+  # minX = min(perm, key=lambda seg: min(seg.start.x, seg.end.x))
+
+  scan = minY + increment
+  print "starting at y = " + str(minY)
+  #segmentsConsidered = []
+  while(scan <= maxY):
+    scanLine = Segment(Point3D(minX, scan, 0), Point3D(maxX, scan, 0), None) # note: probably dangerous to have none
+    #segmentsConsidered = filter(lambda x: floatLE(x.start.y, scanLine) and floatGE(x.z_max, scanLine), perm)
+    lineHits = []
+    for seggy in allSegments:
+      intersect = scanLine.intersect2D(seggy)
+      if(intersect):
+        lineHits.append(intersect)
+    if(not lineHits):
+      print "Y value failure: " + str(scan)
+      #raise Exception("Uhoh! The infill finder did not find a inside part.")
+    final.append(lineHits)
+    scan += increment
+  return final
+
 
 # ==============================================================================
 # ========================= GCODE GENERATION FUNCTIONS =========================
@@ -105,13 +156,17 @@ def generateGCodeInfill(gfile, params, layerZ, perimeters):
   lines.append("; INFILL")
   infill = makeInfill(perimeters, params.infill, direction)
   for points in infill:
+    if not points:
+      continue
     # move to start point
+    map(printFunc, points)
+    print type(points)
     lines.append("G1 X{:3.6f} Y{:3.6f}".format(points[0].x, points[0].y))
-    for i in xrange(points-1):
+    for i in xrange(len(points)-1):
       start = points[i]
       end = points[i+1]
       if i % 2 == 0: # We're inside, so extrude
-        extrude_amound = calculateExtrudeAmount(start.x, start.y, end.x, end.y, params.thickness)
+        extrude_amount = calculateExtrudeAmount(start.x, start.y, end.x, end.y, params.thickness)
         updateExtruded(extrude_amount)
         lines.append("G1 X{:3.3f} Y{:3.3f} E{:3.5f}".format(end.x, end.y, extruded))
       else: # We're outside, so don't extrude
@@ -160,7 +215,7 @@ def generateGCode(gfile, params, layerZ, perimeters):
   # --- Generate the code for the infill ---
   # infill_perimeters = concentricPerimeters.pop() # Pops off last element
   infill_perimeters = perimeters # DEBUG temporary for nick
-  # generateGCodeInfill(gfile, params, layerZ, infill_perimeters) NICK UNCOMMENT TO VISUALIZE
+  generateGCodeInfill(gfile, params, layerZ, infill_perimeters)
 
   return
 

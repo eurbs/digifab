@@ -211,7 +211,7 @@ class Triangle(object):
       start = Point3D(countingX1, scanLineY, z)
       end = Point3D(countingX2, scanLineY, z)
       #print "start: " + str(start) + "end: " + str(end)
-      lineSeggies.append(Segment(start, end))
+      lineSeggies.append(Segment(start, end, None)) # note: probably dangerous
 
       countingX1 -= (inverseSlope1*thickness)
       countingX2 -= (inverseSlope2*thickness)
@@ -231,7 +231,7 @@ class Triangle(object):
     while(scanLineY < v1.y):
       start = Point3D(countingX1, scanLineY, z)
       end = Point3D(countingX2, scanLineY, z)
-      lineSeggies.append(Segment(start, end))
+      lineSeggies.append(Segment(start, end, None)) # note: probably dangerous
 
       countingX1 += (inverseSlope1*thickness)
       countingX2 += (inverseSlope2*thickness)
@@ -325,7 +325,8 @@ class Triangle(object):
       return []
 
     # --- Get the perpendicular line that faces inward ---
-    return [Segment(seggy[0], seggy[1], )]
+    normal_projection = [self.normal.x, self.normal.y]
+    return [Segment(seggy[0], seggy[1], normalize2DVec(normal_projection))]
 
 
 def test():
