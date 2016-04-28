@@ -43,7 +43,7 @@ def makePerimeter(segmentsPerLayer):
         break
     if not found:
       perimeterNumber += 1
-      final.append(segments[0])
+      final.append([segments[0]])
       search = segments[0].end
       segments.pop(0)
 
@@ -58,7 +58,6 @@ def makePerimeter(segmentsPerLayer):
 def main():
   #Step 0: Parse user input to get constants
   params = parseInput()
-  gfile = open(params.gcodefilename, "w")
   thickness = params.thickness
   
   #Step 1: Parse the STL into a list of triangles
@@ -78,6 +77,7 @@ def main():
   # Iterate increasing the z value of the plane by layer thickness until = top
 
   # GCODE
+  gfile = open(params.gcodefilename, "w")
   gcode.generateSetup(gfile, params)
   while floatLE(layer, top):
     print "Layer #{:3.4}".format(layer)
