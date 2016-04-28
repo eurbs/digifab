@@ -323,7 +323,9 @@ class Triangle(object):
       # triangle intersects plane at single point
       #return [Segment(seggy[0], seggy[0])]
       return []
-    return [Segment(seggy[0], seggy[1])]
+
+    # --- Get the perpendicular line that faces inward ---
+    return [Segment(seggy[0], seggy[1], )]
 
 
 def test():

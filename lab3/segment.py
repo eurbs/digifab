@@ -14,9 +14,11 @@ The line segment class
 """
 
 class Segment(object):
-  def __init__(self, start, end):
+  def __init__(self, start, end, perpIn):
     self.start = start
     self.end = end
+    self.perpIn = perpIn  # This is set after the initialization of a segment
+    # perpIn stands for perpendicular unit vector pointing inward
 
   def __str__(self):
     return "segment:\n\tstart {!s}\n\t  end {!s}".format(self.start, self.end)
