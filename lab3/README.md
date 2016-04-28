@@ -18,7 +18,7 @@ We created a slicer that reads in stl geometry files and outputs gcode suitable 
 - Defined a cutting plane and an intersection function for triangles to determine if and when a triangle intersects the cutting plane (Nick)
 - Wrote a naive algorithm for turning the line segments into a perimeter per z slice (Nick)
 - Wrote GCode to turn perimeters into actual printer moves. This included writing a preamble and cleanup code on top of parsing incoming perimeters to move the print head. Calculations were also done to determine how much filament to extrude per segment (Emilee)
-- Created an infill algorithm to determine when perimeters should be filled. This involved defining a scan line segment and checking line segment intersection along each section of the perimeter (Nick)
+- Created an infill algorithm to determine when perimeters should be filled. This involved defining a scan line segment and checking line segment intersection along each section of the perimeter (Nick). Fixed the segment intersection by adding bound checking and found that floating points can't be compared using the regular comparison operators -- what a bug (Emilee).
 - Handled edge case of a triangle parallel to the cutting plane: Raster fill it completely (Nick). Write gcode to handle this different fill path (Emilee)
 - Handled wall thickness contraints. This meant creating a slightly smaller perimeter around the object so the walls have thickness more than a single extrude line (Emilee)
 

@@ -61,7 +61,7 @@ class Segment(object):
     Px = pXTop / pButt
     Py = pYTop / pButt
 
-    # Bound checking
+    # Set left and right bounds
     if x1 < x2:
       sleft = x1
       sright = x2
@@ -86,14 +86,11 @@ class Segment(object):
     else:
       odown = y4
       oup = y3
-    if(Px < sleft or Px > sright):
-      #print "Outside bounds Butt: " + str(pButt)
+
+    # Check bounds
+    if floatLT(Px, sleft) or floatGT(Px, sright) or floatLT(Py, sdown) or floatGT(Py, sup):
       return None
-    if(Py < sdown or Py > sup):
-      return None
-    if Px < oleft or Px > oright:
-      return None
-    if Py < odown or Py > oup:
+    if floatLT(Px, oleft) or floatGT(Px, oright) or floatLT(Py, odown) or floatGT(Py, oup):
       return None
 
     #print("Good!")

@@ -66,7 +66,9 @@ def makeInfill(perimeters, infill, direction):
       intersect = scanLine.intersect2D(seggy)
       if intersect:
         lineHits.append(intersect)
-    final.append(list(deleteDuplicates(lineHits)))
+    # final.append(list(deleteDuplicates(lineHits)))
+    sortedLineHits = sorted(lineHits, key=lambda x: x.x)
+    final.append(sortedLineHits)
     scan += increment
 
   return final
@@ -186,6 +188,7 @@ def generateGCodeInfill(gfile, params, layerZ, perimeters):
   lines.append("; INFILL")
   infill = makeInfill(perimeters, params.infill, direction)
   for points in infill:
+    lines.append("; NEW INFILL LINE")
     if not points:
       continue
     # move to start point
