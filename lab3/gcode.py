@@ -38,6 +38,8 @@ def makeInfill(perimeters, infill, direction):
   # TODO: Support direction
   if(not perimeters):
     return None
+  if(infill == 0):
+    return None
   final = []
   allSegments = []
   maxY = perimeters[0][0].start.y
@@ -54,8 +56,13 @@ def makeInfill(perimeters, infill, direction):
 
   #linear interpolation between 0-100% infill
   layerThickness = .4
-  increment = layerThickness + infill*(layerThickness - (maxY - minY))
-  increment = 1
+  
+  #increment = (1-infill)*((abs(maxY) - abs(minY))) + infill*layerThickness
+  increment = layerThickness / infill
+  print str(increment)
+  if(increment < 0):
+    raise Exception("increment is negative")
+  #increment = 1
 
   scan = minY + increment
 
@@ -70,7 +77,6 @@ def makeInfill(perimeters, infill, direction):
     sortedLineHits = sorted(lineHits, key=lambda x: x.x)
     final.append(sortedLineHits)
     scan += increment
-
   return final
 
 def resizePerimeters(params, perimeters, brim=False, raft=False):
