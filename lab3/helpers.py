@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-#import point3d
->>>>>>> ac0b91d9fa4e4c481021333be7cb9d64368005a9
 import math
 """
 Emilee Urbanek and Nick Confrey
