@@ -7,8 +7,8 @@ We created a slicer that reads in stl geometry files and outputs gcode suitable 
 - run `python slicer.py [stl file path]`
 - for more options, run `python slicer.py -h` (Perimeter layers, layer height, etc)
 - Some good choices are in the samples folder, namely `samples/sphere.stl` or `samples/cube.stl`
-- Output will be the stl file name in the samples folder. So `sphere.stl` becomes `sphere.gcode`.
-- Use http://gcode.ws to view the gcode
+- Output will be the stl file name in the same directory as the stl file. So `sphere.stl` becomes `sphere.gcode`.
+- Use [http://gcode.ws](http://gcode.ws) to view the gcode
 
 ## Accomplishments
 
