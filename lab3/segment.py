@@ -45,13 +45,18 @@ class Segment(object):
   	pButt = (x1 - x2)*(y3 - y4) - (y1 - y2)*(x3 - x4)
   	pYTop = (x1*y2 - y1*x2) * (y3 - y4) - (y1 - y2)*(x3*y4 - y3*x4)
 
+  	#print "Butt: " + str(pButt)
   	if(isclose(pButt, 0)):
+  		#print "comparing " + str(s) + "\n with " + str(o)
+  		print "No intersection, butt:" + str(pButt)
   		return None
   	Px = pXTop / pButt
   	Py = pYTop / pButt
   	if(Px < x1 or Px > x2):
+  		print "Outside bounds Butt: " + str(pButt)
   		return None
   	if(Py < y1 or Py > y2):
   		return None
 
+  	print("Good!")
   	return Point3D(Px, Py, 0)

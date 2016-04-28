@@ -94,51 +94,6 @@ def pointsToSegments(perimeter):
     segments.append(Segment(point, perimeter[i+1]))
   return segments
 
-#return type: list of lists of points by either x or y coordinate
-#from min to max y
-def makeInfill(perimeters, infill, direction):
-  final = []
-  allSegments = []
-  maxY = perimeters[0][0].start.y
-  minY = perimeters[0][0].start.y 
-  maxX = perimeters[0][0].start.x
-  minX = perimeters[0][0].start.x
-  for perimeter in perimeters:
-    for segment in perimeter:
-      maxY = max(maxY, max(segment.start.y, segment.end.y))
-      minY = min(minY, min(segment.start.y, segment.end.y))
-      maxX = max(maxX, max(segment.start.x, segment.end.x))
-      minX = min(minX, min(segment.start.x, segment.end.x))
-      allSegments.append(segment)
-
-  #linear interpolation between 0-100% infill
-  layerThickness = .4
-  increment = layerThickness + infill*(layerThickness - (maxY - minY))
-  increment = 1
-  print "increment is: " + str(increment)
-  #Optimize: is there a pretty way to get both of these in one pass?
-  # maxY = max(perm, key=lambda seg: max(seg.start.y, seg.end.y))
-  # minY = min(perm, key=lambda seg: min(seg.start.y, seg.end.y))
-  # maxX = max(perm, key=lambda seg: max(seg.start.x, seg.end.x))
-  # minX = min(perm, key=lambda seg: min(seg.start.x, seg.end.x))
-
-  scan = minY + increment
-  print "starting at y = " + str(minY)
-  #segmentsConsidered = []
-  while(scan <= maxY):
-    scanLine = Segment(Point3D(minX, scan, 0), Point3D(maxX, scan, 0))
-    #segmentsConsidered = filter(lambda x: floatLE(x.start.y, scanLine) and floatGE(x.z_max, scanLine), perm)
-    lineHits = []
-    for seggy in allSegments:
-      intersect = scanLine.intersect2D(seggy)
-      if(intersect):
-        lineHits.append(intersect)
-    if(not lineHits):
-      print "Y value failure: " + str(scan)
-      raise Exception("Uhoh! The infill finder did not find a inside part.")
-    final.append(lineHits)
-    scan += increment
-  return final
 
 def main():
   #Step 0: Parse user input to get constants
@@ -218,15 +173,15 @@ def main():
         for per in perm:
           print "\t " + str(per)
 
-    infillList = makeInfill(perimeters, .50, "blah")
-    for i,fill in enumerate(infillList):
-      print "Layer #" + str(i)
-      for point in fill:
-        print "\t" + str(point)
-    break
+    # infillList = makeInfill(perimeters, .50, "blah")
+    # if infillList:
+    #   for i,fill in enumerate(infillList):
+    #     print "Layer #" + str(i)
+    #     for point in fill:
+    #       print "\t" + str(point)
+    
     print "generating gcode for layer {!s} perimeters".format(layer) # DEBUG
     gcode.generateGCode(gfile, params, layer, perimeters)
-    #makeInfill(perimeters)
 
     print "generating gcode for case2 (parallel to cutting plane) triangles" # DEBUG
     gcode.generateGCodeParallel(gfile, params, layer, parallelTrianglesInLayer)
