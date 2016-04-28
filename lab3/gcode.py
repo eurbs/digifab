@@ -59,7 +59,7 @@ def makeInfill(perimeters, infill, direction):
   
   #increment = (1-infill)*((abs(maxY) - abs(minY))) + infill*layerThickness
   increment = layerThickness / infill
-  print str(increment)
+
   if(increment < 0):
     raise Exception("increment is negative")
   #increment = 1

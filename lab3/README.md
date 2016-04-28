@@ -35,6 +35,7 @@ We created a slicer that reads in stl geometry files and outputs gcode suitable 
 9. **Draw circle around object before printing** this gets the extrusion going for better sticking
 10. **Option for output directory** And default to a gcode directory.
 11. **Support Brims**. `resizePerimeters()` already does this for wall heights, but unfortunately we have a bug for our bottom layer perimeter. With a little bit of bug hunting and some repurposing of code, brims would be supported.
+12. **Log Level Option**. We'd like to keep our print statements and debug logs, but have the option to run our program without forcing users to see those logs. Lesson learned for all future projects.
 
 ## Summary
 
